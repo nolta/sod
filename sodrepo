@@ -1,0 +1,84 @@
+#!/usr/bin/env python
+
+from __future__ import absolute_import, division, print_function
+
+import os
+import sqlite3
+import sys
+
+def error(*args):
+    print("sodrepo error:", *args, file=sys.stderr)
+    sys.exit(1)
+
+create_table_packages_sql = """\
+create table packages (
+  name text not null,
+  version text not null,
+  release text not null,
+  arch text not null,
+  provides text,
+  requires text,
+  summary text not null,
+  script text not null,
+  unique (name,version,release,arch))"""
+
+def create_repo(filename):
+    if os.path.exists(filename):
+        error("repo", filename, "exists")
+    conn = sqlite3.connect(filename)
+    conn.execute(create_table_packages_sql)
+    conn.commit()
+    conn.close()
+
+class SodRepo(object):
+
+    def __init__(self, filename):
+        if not os.path.isfile(filename):
+            error("repo", filename, "doesn't exist")
+        self.filename = filename
+        self.conn = sqlite3.connect(filename)
+
+    def __del__(self):
+        if hasattr(self, 'conn'):
+            self.conn.close()
+
+    def add_pkg(self, name, version, release, arch, summary, script,
+                provides=None, requires=None):
+        try:
+            self.conn.execute('insert into packages values (?,?,?,?,?,?,?,?)',
+                (name,version,release,arch,provides,requires,summary,script))
+            self.conn.commit()
+        except sqlite3.IntegrityError as e:
+            # TBD: ignore duplicate inserts
+            raise e
+
+def main():
+    import argparse
+    parser = argparse.ArgumentParser(prog='sodrepo')
+    parser.add_argument('-c', '--create-repo', action='store_true')
+    parser.add_argument('-r', '--repo')
+    subparsers = parser.add_subparsers(dest='cmd')
+
+    pkg = subparsers.add_parser('add', help='add package')
+    pkg.add_argument('name')
+    pkg.add_argument('version')
+    pkg.add_argument('release')
+    pkg.add_argument('arch')
+    pkg.add_argument('summary')
+    pkg.add_argument('--requires')
+    pkg.add_argument('--provides')
+
+    args = parser.parse_args()
+
+    if args.create_repo:
+        create_repo(args.repo)
+    repo = SodRepo(args.repo)
+
+    if args.cmd == 'add':
+        script = sys.stdin.read().strip()
+        repo.add_pkg(args.name, args.version, args.release, args.arch,
+            args.summary, script, requires=args.requires, provides=args.provides)
+
+if __name__ == '__main__':
+    main()
+
