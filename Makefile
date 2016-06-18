@@ -1,5 +1,6 @@
 
 prefix     = /usr/local
+bindir     = $(prefix)/bin
 incdirs    = $(prefix)/include
 libdirs    = $(prefix)/lib64 $(prefix)/lib
 rpaths     = '$$ORIGIN/../lib64' '$$ORIGIN/../lib'
@@ -21,7 +22,7 @@ endif
 sod: sod.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -o $@ $^ $(LDFLAGS)
 
-.PHONY: check clean test
+.PHONY: check clean install test
 
 check test: sod
 	bash test_module.bash
@@ -29,4 +30,7 @@ check test: sod
 
 clean:
 	-rm sod test.sodrepo
+
+install: sod
+	install sod $(bindir)
 
