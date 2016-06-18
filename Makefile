@@ -10,11 +10,10 @@ LDFLAGS    = $(addprefix -L,$(libdirs)) -lsolvext -lsolv -lsqlite3
 
 -include config.mk
 
-, := ,
-space :=
-space +=
-
 ifneq ($(shell uname), Darwin)
+  , := ,
+  space :=
+  space +=
   LDFLAGS += -Wl,-z,origin $(addprefix -Wl$(,)-rpath$(,),$(rpaths))
   SOD_ENV = LD_LIBRARY_PATH="$(subst $(space),:,$(libdirs)):$$LD_LIBRARY_PATH"
 endif
@@ -22,8 +21,12 @@ endif
 sod: sod.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -o $@ $^ $(LDFLAGS)
 
-.PHONY: check test
+.PHONY: check clean test
+
 check test: sod
 	bash test_module.bash
 	$(SOD_ENV) bash test_sod
+
+clean:
+	-rm sod test.sodrepo
 
