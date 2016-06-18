@@ -54,7 +54,7 @@ echo(const char *fmt, ...)
 
 typedef struct {
     const char *ptr;
-    size_t len;
+    int len;
 } substring_t;
 
 char *
@@ -86,9 +86,9 @@ repo_add(Pool *pool, const char *filename)
     sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
     while (sqlite3_step(stmt) == SQLITE_ROW) {
         const char
-            *pkg = sqlite3_column_text(stmt, 0),
-            *evr = sqlite3_column_text(stmt, 1),
-            *arch = sqlite3_column_text(stmt, 2);
+            *pkg = (const char *)sqlite3_column_text(stmt, 0),
+            *evr = (const char *)sqlite3_column_text(stmt, 1),
+            *arch = (const char *)sqlite3_column_text(stmt, 2);
 
         Solvable *s = pool_id2solvable(pool, repo_add_solvable(repo));
         s->name = pool_str2id(pool, pkg, 1);
@@ -99,7 +99,7 @@ repo_add(Pool *pool, const char *filename)
         s->provides = repo_addid_dep(repo, s->provides,
             pool_rel2id(pool, s->name, s->evr, REL_EQ, 1), 0);
 
-        const char *provides = sqlite3_column_text(stmt, 3);
+        const char *provides = (const char *)sqlite3_column_text(stmt, 3);
         if (provides && *provides) {
             char *tmpstr = strdup(provides);
             FORTOKEN(pro, tmpstr, ";") {
@@ -109,7 +109,7 @@ repo_add(Pool *pool, const char *filename)
             free(tmpstr);
         }
 
-        const char *requires = sqlite3_column_text(stmt, 4);
+        const char *requires = (const char *)sqlite3_column_text(stmt, 4);
         if (requires && *requires) {
             char *tmpstr = strdup(requires);
             FORTOKEN(req, tmpstr, ";") {
@@ -120,12 +120,12 @@ repo_add(Pool *pool, const char *filename)
         }
 
         // summary
-        const char *summary = sqlite3_column_text(stmt, 5);
+        const char *summary = (const char *)sqlite3_column_text(stmt, 5);
         if (summary && *summary)
             repodata_set_str(data, s-pool->solvables, SOLVABLE_SUMMARY, summary);
 
         // script
-        const char *script = sqlite3_column_text(stmt, 6);
+        const char *script = (const char *)sqlite3_column_text(stmt, 6);
         if (script && *script)
             repodata_set_str(data, s-pool->solvables, SOLVABLE_SCRIPT, script);
     }
@@ -222,7 +222,6 @@ parse_script(const char *script, int *ncmds)
 
         char *k = strchr(s, ' ');
         assert(k);
-        int no = k - s;
         while (*++k == ' '); // skip spaces
 
         char *v = strchr(k, ' ');
