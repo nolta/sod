@@ -1,29 +1,29 @@
 
-libsolv        = $(prefix)
-libsolv_inc    = $(libsolv)/include
-libsolv_lib    = $(libsolv)/lib64
-libsqlite3     = /usr
-libsqlite3_inc = $(libsqlite3)/include
-libsqlite3_lib = $(libsqlite3)/lib64
-prefix         = /usr/local
-uname          = $(shell uname)
+prefix     = /usr/local
+incdirs    = $(prefix)/include
+libdirs    = $(prefix)/lib64 $(prefix)/lib
+rpaths     = '$$ORIGIN/../lib64' '$$ORIGIN/../lib'
 
-CFLAGS         = -g -Wall -std=gnu99 -I$(libsolv_inc) -I$(libsqlite3_inc)
-LDFLAGS        = -L$(libsolv_lib) -lsolvext -lsolv \
-		 -L$(libsqlite3_lib) -lsqlite3
+CFLAGS     = -Wall -std=gnu99
+CPPFLAGS   = $(addprefix -I,$(incdirs))
+LDFLAGS    = $(addprefix -L,$(libdirs)) -lsolvext -lsolv -lsqlite3
 
-ifeq ($(uname), Darwin)
-  libsqlite3_lib = $(libsqlite3)/lib
-else
-  rpath = $(shell realpath $(libsolv_lib))
-  LDFLAGS += -Wl,-rpath=$(rpath)
+-include config.mk
+
+, := ,
+space :=
+space +=
+
+ifneq ($(shell uname), Darwin)
+  LDFLAGS += -Wl,-z,origin $(addprefix -Wl$(,)-rpath$(,),$(rpaths))
+  SOD_ENV = LD_LIBRARY_PATH="$(subst $(space),:,$(libdirs)):$$LD_LIBRARY_PATH"
 endif
 
 sod: sod.c
-	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+	$(CC) $(CFLAGS) $(CPPFLAGS) -o $@ $^ $(LDFLAGS)
 
 .PHONY: check test
-check test:
+check test: sod
 	bash test_module.bash
-	bash test_sod
+	$(SOD_ENV) bash test_sod
 
