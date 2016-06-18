@@ -6,7 +6,8 @@
 * sqlite3
 * python 2.7
 * C compiler
-* bash
+* bash >= 3.2
+* Linux or macOS
 
 ## Building
 

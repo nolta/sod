@@ -8,57 +8,57 @@ source module.bash
 # set/unset
 
 unset XYZ
-[[ -z ${XYZ+x} ]]
+[ -z ${XYZ+x} ]
 __sod_set XYZ 'x y z'
-[[ ! -z ${XYZ+x} ]]
-[[ "$XYZ" == 'x y z' ]]
+[ ! -z ${XYZ+x} ]
+[ "$XYZ" == 'x y z' ]
 __sod_unset XYZ
-[[ -z ${XYZ+x} ]]
+[ -z ${XYZ+x} ]
 
 # push/pop
 
 unset XYZ
 __sod_push XYZ a
-[[ "$XYZ" == 'a' ]]
+[ "$XYZ" == 'a' ]
 __sod_push XYZ b
-[[ "$XYZ" == 'b:a' ]]
+[ "$XYZ" == 'b:a' ]
 __sod_push XYZ c
-[[ "$XYZ" == 'c:b:a' ]]
+[ "$XYZ" == 'c:b:a' ]
 __sod_push XYZ d
-[[ "$XYZ" == 'd:c:b:a' ]]
+[ "$XYZ" == 'd:c:b:a' ]
 __sod_push XYZ e
-[[ "$XYZ" == 'e:d:c:b:a' ]]
+[ "$XYZ" == 'e:d:c:b:a' ]
 __sod_pop XYZ e
-[[ "$XYZ" == 'd:c:b:a' ]]
+[ "$XYZ" == 'd:c:b:a' ]
 __sod_pop XYZ c
-[[ "$XYZ" == 'd:b:a' ]]
+[ "$XYZ" == 'd:b:a' ]
 __sod_pop XYZ a
-[[ "$XYZ" == 'd:b' ]]
+[ "$XYZ" == 'd:b' ]
 __sod_pop XYZ d
-[[ "$XYZ" == 'b' ]]
+[ "$XYZ" == 'b' ]
 __sod_pop XYZ b
-[[ "$XYZ" == '' ]]
+[ "$XYZ" == '' ]
 __sod_push XYZ b
-[[ "$XYZ" == 'b' ]]
+[ "$XYZ" == 'b' ]
 __sod_push XYZ 'x y z'
-[[ "$XYZ" == 'x y z:b' ]]
+[ "$XYZ" == 'x y z:b' ]
 __sod_push XYZ 'u $v'
-[[ "$XYZ" == 'u $v:x y z:b' ]]
+[ "$XYZ" == 'u $v:x y z:b' ]
 __sod_pop XYZ 'x y z'
-[[ "$XYZ" == 'u $v:b' ]]
+[ "$XYZ" == 'u $v:b' ]
 __sod_push XYZ 'a:b'
-[[ "$XYZ" == 'a:b:u $v:b' ]]
+[ "$XYZ" == 'a:b:u $v:b' ]
 __sod_pop XYZ 'b'
-[[ "$XYZ" == 'a:u $v:b' ]]
+[ "$XYZ" == 'a:u $v:b' ]
 __sod_pop XYZ 'u $v'
-[[ "$XYZ" == 'a:b' ]]
+[ "$XYZ" == 'a:b' ]
 __sod_push XYZ ''
-[[ "$XYZ" == ':a:b' ]]
+[ "$XYZ" == ':a:b' ]
 __sod_pop XYZ a
-[[ "$XYZ" == ':b' ]]
+[ "$XYZ" == ':b' ]
 __sod_push XYZ 'c'
-[[ "$XYZ" == 'c::b' ]]
+[ "$XYZ" == 'c::b' ]
 __sod_pop XYZ ''
-[[ "$XYZ" == 'c:b' ]]
+[ "$XYZ" == 'c:b' ]
 
 exit 0

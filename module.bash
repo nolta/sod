@@ -26,6 +26,8 @@ function __sod_unset() {
 }
 
 function module() {
-    source <(sod "$@")
+    while read line; do
+        eval "$line"
+    done < <(sod "$@")
 }
 
