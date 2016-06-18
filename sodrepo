@@ -55,11 +55,12 @@ class SodRepo(object):
 def main():
     import argparse
     parser = argparse.ArgumentParser(prog='sodrepo')
-    parser.add_argument('-c', '--create-repo', action='store_true')
     parser.add_argument('-r', '--repo')
     subparsers = parser.add_subparsers(dest='cmd')
 
-    pkg = subparsers.add_parser('add', help='add package')
+    pkg = subparsers.add_parser('create', help='create repo')
+
+    pkg = subparsers.add_parser('add', help='add package to repo')
     pkg.add_argument('name')
     pkg.add_argument('version')
     pkg.add_argument('release')
@@ -70,11 +71,10 @@ def main():
 
     args = parser.parse_args()
 
-    if args.create_repo:
+    if args.cmd == 'create':
         create_repo(args.repo)
-    repo = SodRepo(args.repo)
-
-    if args.cmd == 'add':
+    elif args.cmd == 'add':
+        repo = SodRepo(args.repo)
         script = sys.stdin.read().strip()
         repo.add_pkg(args.name, args.version, args.release, args.arch,
             args.summary, script, requires=args.requires, provides=args.provides)

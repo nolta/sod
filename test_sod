@@ -8,7 +8,8 @@ repo=test.sodrepo
 unset __sod_repos
 unset __sod_installed
 
-./sodrepo -cr $repo add intel 16.0.2 1 x86_64 "summary" <<____
+./sodrepo -r $repo create
+./sodrepo -r $repo add intel 16.0.2 1 x86_64 "summary" <<____
 + PATH /a/b/c
 = XYZ /x/y/z
 ____
