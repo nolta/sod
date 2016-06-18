@@ -130,7 +130,7 @@ repo_add(Pool *pool, const char *filename)
             repodata_set_str(data, s-pool->solvables, SOLVABLE_SCRIPT, script);
     }
     sqlite3_finalize(stmt);
-    sqlite3_close_v2(db);
+    sqlite3_close(db);
 
     repodata_free_dircache(data);
     repodata_internalize(data);
