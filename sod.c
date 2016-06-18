@@ -447,7 +447,7 @@ main(int argc, char *argv[])
         for (int prob = 1; prob <= nprobs; prob++)
         {
             fprintf(stderr, "Problem");
-            if (nprobs > 1) fprintf(stderr, " %d");
+            if (nprobs > 1) fprintf(stderr, " %d", prob);
             fprintf(stderr, ":\n");
             solver_printprobleminfo(solv, prob);
             fprintf(stderr, "\n");
