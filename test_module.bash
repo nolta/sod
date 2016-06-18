@@ -8,12 +8,12 @@ source module.bash
 # set/unset
 
 unset XYZ
-[[ ! -v XYZ ]]
+[[ -z ${XYZ+x} ]]
 __sod_set XYZ 'x y z'
-[[ -v XYZ ]]
+[[ ! -z ${XYZ+x} ]]
 [[ "$XYZ" == 'x y z' ]]
 __sod_unset XYZ
-[[ ! -v XYZ ]]
+[[ -z ${XYZ+x} ]]
 
 # push/pop
 
