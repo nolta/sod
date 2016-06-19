@@ -396,23 +396,38 @@ main(int argc, char *argv[])
     pool_addfileprovides(pool);
     pool_createwhatprovides(pool);
 
-    Queue jobs, sel;
+    Queue jobs, repofilter;
     queue_init(&jobs);
-    queue_init(&sel);
 
-    int selflags = SELECTION_NAME | SELECTION_PROVIDES | SELECTION_CANON |
-                   SELECTION_DOTARCH | SELECTION_REL | SELECTION_GLOB;
+    if (optind < argc) {
+        int selflags = SELECTION_NAME | SELECTION_PROVIDES | SELECTION_CANON |
+                       SELECTION_DOTARCH | SELECTION_REL | SELECTION_GLOB;
+        if (mode == LIST)
+            selflags |= SELECTION_INSTALLED_ONLY;
 
-    for (; optind < argc; optind++) {
-        const char *arg = argv[optind];
-        selection_make(pool, &sel, arg, selflags);
-        if (!sel.count) error("no match for '%s'", arg);
-        for (int i = 0; i < sel.count; i++) {
-            queue_push(&jobs, sel.elements[i]);
+        Queue sel;
+        queue_init(&sel);
+        for (; optind < argc; optind++) {
+            const char *arg = argv[optind];
+            selection_make(pool, &sel, arg, selflags);
+            if (!sel.count) error("no match for '%s'", arg);
+            for (int i = 0; i < sel.count; i++) {
+                queue_push(&jobs, sel.elements[i]);
+            }
+            queue_empty(&sel);
         }
-        queue_empty(&sel);
+        queue_free(&sel);
+
+    } else if (mode == AVAIL) {
+        queue_push2(&jobs, SOLVER_SOLVABLE_ALL, 0);
+
+    } else if (mode == LIST) {
+        queue_init(&repofilter);
+        queue_push2(&jobs, SOLVER_SOLVABLE_ALL, 0);
+        queue_push2(&repofilter, SOLVER_SOLVABLE_REPO | SOLVER_SETREPO,
+            pool->installed->repoid);
+        selection_filter(pool, &jobs, &repofilter);
     }
-    queue_free(&sel);
 
     if (mode == AVAIL || mode == LIST) {
         Queue q;

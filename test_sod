@@ -40,6 +40,10 @@ ____
 cmp <(./sod -r $repo -I intel-16.0.2-1.x86_64@test load intel) <<____
 ____
 
+cmp <(./sod -r $repo -I intel-16.0.2-1.x86_64@test list intel) <<____
+echo intel-16.0.2-1.x86_64
+____
+
 cmp <(./sod -r $repo -I intel-16.0.2-1.x86_64@test unload intel) <<____
 echo unloading intel-16.0.2-1.x86_64@test
 __sod_unset XYZ '/x/y/z'
