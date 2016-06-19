@@ -1,7 +1,6 @@
 #!/bin/bash
 set -e -u -E
 trap 'echo error at line $LINENO' ERR
-trap '[[ $? == 0 ]] && echo OK' EXIT
 
 repo=test.sodrepo
 [[ -f $repo ]] && rm $repo
@@ -65,4 +64,5 @@ echo loading intel-14.0.4-1.x86_64@test
 echo loading hdf5-intel-1.8.14-1.x86_64@test
 ____
 
+echo OK
 exit 0

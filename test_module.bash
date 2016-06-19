@@ -1,7 +1,6 @@
 #!/bin/bash
 set -e -u -E
 trap 'echo error at line $LINENO' ERR
-trap '[[ $? == 0 ]] && echo OK' EXIT
 
 source module.bash
 
@@ -61,4 +60,5 @@ __sod_push XYZ 'c'
 __sod_pop XYZ ''
 [ "$XYZ" == 'c:b' ]
 
+echo OK
 exit 0
