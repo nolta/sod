@@ -383,7 +383,6 @@ main(int argc, char *argv[])
 
     int selflags = SELECTION_NAME | SELECTION_PROVIDES | SELECTION_CANON |
                    SELECTION_DOTARCH | SELECTION_REL | SELECTION_GLOB;
-    if (mode == 'e') selflags |= SELECTION_INSTALLED_ONLY;
 
     for (; optind < argc; optind++) {
         const char *arg = argv[optind];
@@ -471,13 +470,12 @@ main(int argc, char *argv[])
             Id p = trans->steps.elements[j];
             Id type = transaction_type(trans, p, SOLVER_TRANSACTION_RPM_ONLY);
             Solvable *s = pool_id2solvable(pool, p);
+            if (type == SOLVER_TRANSACTION_ERASE) {
+                p = solvable_lookup_id(s, SOLVABLE_SOURCEID);
+                s = pool_id2solvable(pool, p);
+            }
             const char *str = testcase_solvid2str(pool, p);
             const char *script = solvable_lookup_str(s, SOLVABLE_SCRIPT);
-            if (!script) {
-                Id p = solvable_lookup_id(s, SOLVABLE_SOURCEID);
-                Solvable *s = pool_id2solvable(pool, p);
-                script = solvable_lookup_str(s, SOLVABLE_SCRIPT);
-            }
 
             int ncmds = 0;
             cmd_t *cmds = parse_script(script, &ncmds);
