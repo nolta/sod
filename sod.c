@@ -258,7 +258,20 @@ enum sod_mode {
     LOAD,
     PURGE,
     SWAP,
-    UNLOAD
+    UNLOAD,
+    UNUSE,
+    USE,
+    NUM_SOD_MODES
+};
+
+const int NEEDS_ARGS = 1 << 0;
+
+static int sod_mode_flags[NUM_SOD_MODES] = {
+    [LOAD]    = NEEDS_ARGS,
+    [SWAP]    = NEEDS_ARGS,
+    [UNLOAD]  = NEEDS_ARGS,
+    [UNUSE]   = NEEDS_ARGS,
+    [USE]     = NEEDS_ARGS
 };
 
 struct sod_mode_name {
@@ -327,8 +340,6 @@ main(int argc, char *argv[])
         }
     }
 
-    if (!repos) error("no repo specified");
-
     if (optind == argc) return 0; // nothing to do
     const char *mode_arg = argv[optind++];
     enum sod_mode mode = NONE;
@@ -345,16 +356,30 @@ main(int argc, char *argv[])
         { "swap",      SWAP },
         { "uninstall", UNLOAD },
         { "unload",    UNLOAD },
+        { "unuse",     UNUSE },
+        { "use",       USE },
         { 0 }
     };
 
     for (const struct sod_mode_name *x = mode_names; x->mode; x++) {
         if (strcmp(mode_arg, x->name) == 0) {
             mode = x->mode;
+            if ((sod_mode_flags[mode] & NEEDS_ARGS) && optind == argc)
+                error("missing arguments");
             break;
         }
     }
     if (!mode) error("unknown command: %s", mode_arg);
+
+    if (mode == USE || mode == UNUSE) {
+        const char *action = (mode == USE) ? "__sod_push" : "__sod_pop";
+        for (; optind < argc; optind++) {
+            printf("%s __sod_repos '%s'\n", action, argv[optind]);
+        }
+        return 0;
+    }
+
+    if (!repos) error("no repo specified");
 
     // create & initialize pool
     Pool *pool = pool_create();
