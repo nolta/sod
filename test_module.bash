@@ -5,6 +5,8 @@ trap 'echo error at line $LINENO' ERR
 
 source module.bash
 
+[[ $(module --version) =~ ^sod\ [0-9]+\.[0-9]+\.[0-9]+$ ]] || false
+
 # set/unset
 
 unset XYZ
