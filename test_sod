@@ -23,40 +23,40 @@ ____
 ./sodrepo -r $repo add hdf5-intel 1.8.14 1 x86_64 "" \
     --requires='intel >= 14.0.1; intel < 15' --provides='libhdf5.so.8' <<<""
 
-cmp <(./sod -r $repo -i intel) <<____
+cmp <(./sod -r $repo load intel) <<____
 echo loading intel-16.0.2-1.x86_64@test
 __sod_push PATH '/a/b/c'
 __sod_set XYZ '/x/y/z'
 __sod_push __sod_installed 'intel-16.0.2-1.x86_64@test'
 ____
 
-cmp <(./sod -r $repo -i hdf5-intel) <<____
+cmp <(./sod -r $repo load hdf5-intel) <<____
 echo loading intel-14.0.4-1.x86_64@test
 __sod_push __sod_installed 'intel-14.0.4-1.x86_64@test'
 echo loading hdf5-intel-1.8.14-1.x86_64@test
 __sod_push __sod_installed 'hdf5-intel-1.8.14-1.x86_64@test'
 ____
 
-cmp <(./sod -r $repo -I intel-16.0.2-1.x86_64@test -i intel) <<____
+cmp <(./sod -r $repo -I intel-16.0.2-1.x86_64@test load intel) <<____
 ____
 
-cmp <(./sod -r $repo -I intel-16.0.2-1.x86_64@test -e intel) <<____
+cmp <(./sod -r $repo -I intel-16.0.2-1.x86_64@test unload intel) <<____
 echo unloading intel-16.0.2-1.x86_64@test
 __sod_unset XYZ '/x/y/z'
 __sod_pop PATH '/a/b/c'
 __sod_pop __sod_installed 'intel-16.0.2-1.x86_64@test'
 ____
 
-cmp <(./sod -r $repo -I intel-16.0.2-1.x86_64@test -i hdf5-intel) <<____
+cmp <(./sod -r $repo -I intel-16.0.2-1.x86_64@test load hdf5-intel) <<____
 echo loading hdf5-intel-1.8.11-1.x86_64@test
 __sod_push __sod_installed 'hdf5-intel-1.8.11-1.x86_64@test'
 ____
 
-cmp <(./sod -r test.sodrepo -i libhdf5.so.7 | grep loading) <<____
+cmp <(./sod -r test.sodrepo load libhdf5.so.7 | grep loading) <<____
 echo loading intel-16.0.2-1.x86_64@test
 echo loading hdf5-intel-1.8.11-1.x86_64@test
 ____
-cmp <(./sod -r test.sodrepo -i libhdf5.so.8 | grep loading) <<____
+cmp <(./sod -r test.sodrepo load libhdf5.so.8 | grep loading) <<____
 echo loading intel-14.0.4-1.x86_64@test
 echo loading hdf5-intel-1.8.14-1.x86_64@test
 ____

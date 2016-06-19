@@ -251,23 +251,33 @@ parse_script(const char *script, int *ncmds)
     return cmds;
 }
 
+enum sod_mode {
+    NONE = 0,
+    AVAIL,
+    LIST,
+    LOAD,
+    PURGE,
+    SWAP,
+    UNLOAD
+};
+
+struct sod_mode_name {
+    const char *name;
+    enum sod_mode mode;
+};
+
 int
 main(int argc, char *argv[])
 {
-    int mode = 0;
     char *repos = getenv("__sod_repos");
     char *installed = getenv("__sod_installed");
     int verbose = 0;
 
     const char *shortopts = "ehiI:r:qvV";
     const struct option longopts[] = {
-        { "erase",     no_argument,       0, 'e' },
         { "help",      no_argument,       0, 'h' },
-        { "install",   no_argument,       0, 'i' },
         { "installed", required_argument, 0, 'I' },
         { "repos",     required_argument, 0, 'r' },
-        { "query",     no_argument,       0, 'q' },
-        { "uninstall", no_argument,       0, 'e' },
         { "verbose",   no_argument,       0, 'v' },
         { "version",   no_argument,       0, 'V' },
         { 0, 0, 0, 0 }
@@ -279,11 +289,6 @@ main(int argc, char *argv[])
         int c = getopt_long(argc, argv, shortopts, longopts, 0);
         if (c == -1) break;
         switch (c) {
-        case 'e':
-        case 'i':
-        case 'q':
-            mode = c;
-            break;
         case 'h':
             for (const char **line = usage; *line; line++)
                 echo("%s", *line);
@@ -323,19 +328,33 @@ main(int argc, char *argv[])
     }
 
     if (!repos) error("no repo specified");
-    if (optind == argc) return 0; // nothing to do
 
-    if (!mode) {
-        const char *mode_str = argv[optind++];
-             if (strcmp(mode_str,"load") == 0) mode = 'i';
-        else if (strcmp(mode_str,"install") == 0) mode = 'i';
-        else if (strcmp(mode_str,"unload") == 0) mode = 'e';
-        else if (strcmp(mode_str,"uninstall") == 0) mode = 'e';
-        else if (strcmp(mode_str,"search") == 0) mode = 'q';
-        else if (strcmp(mode_str,"avail") == 0) mode = 'q';
-        else error("need to set -e, -i, or -q");
-    }
     if (optind == argc) return 0; // nothing to do
+    const char *mode_arg = argv[optind++];
+    enum sod_mode mode = NONE;
+
+    const struct sod_mode_name mode_names[] = {
+        { "add",       LOAD },
+        { "avail",     AVAIL },
+        { "erase",     UNLOAD },
+        { "list",      LIST },
+        { "load",      LOAD },
+        { "install",   LOAD },
+        { "purge",     PURGE },
+        { "rm",        UNLOAD },
+        { "swap",      SWAP },
+        { "uninstall", UNLOAD },
+        { "unload",    UNLOAD },
+        { 0 }
+    };
+
+    for (const struct sod_mode_name *x = mode_names; x->mode; x++) {
+        if (strcmp(mode_arg, x->name) == 0) {
+            mode = x->mode;
+            break;
+        }
+    }
+    if (!mode) error("unknown command: %s", mode_arg);
 
     // create & initialize pool
     Pool *pool = pool_create();
@@ -395,8 +414,7 @@ main(int argc, char *argv[])
     }
     queue_free(&sel);
 
-    // list
-    if (mode == 'q') {
+    if (mode == AVAIL || mode == LIST) {
         Queue q;
         queue_init(&q);
         for (int i = 0; i < jobs.count; i += 2) {
@@ -404,13 +422,9 @@ main(int argc, char *argv[])
             for (int j = 0; j < q.count; j++) {
                 Id p = q.elements[j];
                 Solvable *s = pool_id2solvable(pool, p);
-                const char
-                    *str = pool_solvable2str(pool, s),
-                    *sum = solvable_lookup_str(s, SOLVABLE_SUMMARY);
-                if (sum)
-                    echo("%s : %s", str, sum);
-                else
-                    echo("%s", str);
+                const char *str = pool_solvable2str(pool, s);
+                  //  *sum = solvable_lookup_str(s, SOLVABLE_SUMMARY);
+                echo("%s", str); // TBD: sort
             }
             queue_empty(&q);
         }
@@ -420,18 +434,21 @@ main(int argc, char *argv[])
 
     Solver *solv = solver_create(pool);
     solver_set_flag(solv, SOLVER_FLAG_ALLOW_NAMECHANGE, 1);
+    if (mode == PURGE || mode == SWAP)
+        solver_set_flag(solv, SOLVER_FLAG_ALLOW_UNINSTALL, 1);
 
     int how = SOLVER_SOLVABLE_NAME;
     switch (mode) {
-    case 'e':
-        how |= SOLVER_ERASE;
-        solver_set_flag(solv, SOLVER_FLAG_ALLOW_UNINSTALL, 1);
-        break;
-    case 'i':
+    case LOAD:
+    case SWAP:
         how |= SOLVER_INSTALL;
         break;
+    case PURGE:
+    case UNLOAD:
+        how |= SOLVER_ERASE;
+        break;
     default:
-        error("internal error");
+        error("internal error %d", mode);
     }
 
     for (int i = 0; i < jobs.count; i += 2) {
