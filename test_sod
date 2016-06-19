@@ -49,6 +49,10 @@ __sod_pop PATH '/a/b/c'
 __sod_pop __sod_installed 'intel-16.0.2-1.x86_64@test'
 ____
 
+cmp <(./sod -r $repo -I intel-16.0.2-1.x86_64@test purge | grep unload) <<____
+echo unloading intel-16.0.2-1.x86_64@test
+____
+
 cmp <(./sod -r $repo -I intel-16.0.2-1.x86_64@test load hdf5-intel) <<____
 echo loading hdf5-intel-1.8.11-1.x86_64@test
 __sod_push __sod_installed 'hdf5-intel-1.8.11-1.x86_64@test'

@@ -418,7 +418,7 @@ main(int argc, char *argv[])
         }
         queue_free(&sel);
 
-    } else if (mode == AVAIL) {
+    } else if (mode == AVAIL || mode == PURGE) {
         queue_push2(&jobs, SOLVER_SOLVABLE_ALL, 0);
 
     } else if (mode == LIST) {
@@ -452,7 +452,7 @@ main(int argc, char *argv[])
     if (mode == PURGE || mode == SWAP)
         solver_set_flag(solv, SOLVER_FLAG_ALLOW_UNINSTALL, 1);
 
-    int how = SOLVER_SOLVABLE_NAME;
+    int how = (mode == PURGE) ? 0 : SOLVER_SOLVABLE_NAME;
     switch (mode) {
     case LOAD:
     case SWAP:
