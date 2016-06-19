@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e -u -E
-trap 'echo error at line $LINENO' ERR
+trap 'echo $0: error at line $LINENO' ERR
 
 source module.bash
 
