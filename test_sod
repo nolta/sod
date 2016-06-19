@@ -4,8 +4,7 @@ trap 'echo $0: error at line $LINENO' ERR
 
 repo=test.sodrepo
 [[ -f $repo ]] && rm $repo
-unset __sod_repos
-unset __sod_installed
+unset ${!__sod_*}
 
 ./sodrepo -r $repo create
 ./sodrepo -r $repo add intel 16.0.2 1 x86_64 "summary" <<____
