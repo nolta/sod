@@ -25,8 +25,8 @@ sod: sod.c
 .PHONY: check clean install test
 
 check test: sod
-	bash test_module.bash
-	$(SOD_ENV) bash test_sod
+	@$(SOD_ENV) bash test_sod
+	@bash test_module.bash
 
 clean:
 	-rm sod test.sodrepo
