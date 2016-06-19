@@ -437,6 +437,8 @@ main(int argc, char *argv[])
             for (int j = 0; j < q.count; j++) {
                 Id p = q.elements[j];
                 Solvable *s = pool_id2solvable(pool, p);
+                if (mode == AVAIL && s->repo == pool->installed)
+                    continue;
                 const char *str = pool_solvable2str(pool, s);
                   //  *sum = solvable_lookup_str(s, SOLVABLE_SUMMARY);
                 echo("%s", str); // TBD: sort
