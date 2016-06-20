@@ -8,7 +8,7 @@ repo=test.sodrepo
 unset ${!__sod_*}
 
 ./sodrepo -r $repo create
-./sodrepo -r $repo add intel 16.0.2 1 x86_64 "summary" <<____
+./sodrepo -r $repo add intel 16.0.2 1 x86_64 "summary" --provides='compiler' <<____
 + PATH /a/b/c
 = XYZ /x/y/z
 ____
@@ -16,14 +16,14 @@ ____
 function addpkg() {
     ./sodrepo -r $repo add "$@" x86_64 '' <<<''
 }
-addpkg intel 13.1.1 1
-addpkg intel 14.0.4 1
-addpkg intel 15.0.2 1
-addpkg intel 15.0.2 2
-addpkg intel 15.0.6 1
-addpkg hdf5-intel 1.8.11 1 --requires='intel' --provides='libhdf5.so.7'
+addpkg intel 13.1.1 1 --provides='compiler'
+addpkg intel 14.0.4 1 --provides='compiler'
+addpkg intel 15.0.2 1 --provides='compiler'
+addpkg intel 15.0.2 2 --provides='compiler'
+addpkg intel 15.0.6 1 --provides='compiler'
+addpkg hdf5-intel 1.8.11 1 --requires='intel' --provides='hdf5; libhdf5.so.7'
 addpkg hdf5-intel 1.8.14 1 --requires='intel >= 14.0.1; intel < 15' \
-    --provides='libhdf5.so.8'
+    --provides='hdf5; libhdf5.so.8'
 
 cmp <(./sod -r $repo load intel) <<____
 echo loading intel-16.0.2-1.x86_64@test
@@ -62,13 +62,23 @@ echo loading hdf5-intel-1.8.11-1.x86_64@test
 __sod_push __sod_installed 'hdf5-intel-1.8.11-1.x86_64@test'
 ____
 
-cmp <(./sod -r test.sodrepo load libhdf5.so.7 | grep loading) <<____
+cmp <(./sod -r $repo load libhdf5.so.7 | grep loading) <<____
 echo loading intel-16.0.2-1.x86_64@test
 echo loading hdf5-intel-1.8.11-1.x86_64@test
 ____
-cmp <(./sod -r test.sodrepo load libhdf5.so.8 | grep loading) <<____
+cmp <(./sod -r $repo load libhdf5.so.8 | grep loading) <<____
 echo loading intel-14.0.4-1.x86_64@test
 echo loading hdf5-intel-1.8.14-1.x86_64@test
+____
+
+addpkg gcc 5.2.0 1 --provides='compiler'
+addpkg hdf5-gcc 1.8.11 1 --requires='gcc' --provides='hdf5; libhdf5.so.7'
+
+cmp <(./sod -r $repo -I 'hdf5-intel-1.8.11-1.x86_64@test:intel-16.0.2-1.x86_64@test' swap hdf5-gcc | grep load) <<____
+echo unloading hdf5-intel-1.8.11-1.x86_64@test
+echo unloading intel-16.0.2-1.x86_64@test
+echo loading gcc-5.2.0-1.x86_64@test
+echo loading hdf5-gcc-1.8.11-1.x86_64@test
 ____
 
 echo OK

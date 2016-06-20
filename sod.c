@@ -103,8 +103,9 @@ repo_add(Pool *pool, const char *filename)
         if (provides && *provides) {
             char *tmpstr = strdup(provides);
             FORTOKEN(pro, tmpstr, ";") {
-                s->provides = repo_addid_dep(repo, s->provides,
-                    testcase_str2dep(pool, pro), 0);
+                Id p = testcase_str2dep(pool, pro);
+                s->provides = repo_addid_dep(repo, s->provides, p, 0);
+                s->conflicts = repo_addid_dep(repo, s->conflicts, p, 0);
             }
             free(tmpstr);
         }
