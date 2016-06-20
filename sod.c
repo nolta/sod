@@ -287,7 +287,7 @@ main(int argc, char *argv[])
     char *installed = getenv("__sod_installed");
     int verbose = 0;
 
-    const char *shortopts = "ehiI:r:qvV";
+    const char *shortopts = "hI:r:vV";
     const struct option longopts[] = {
         { "help",      no_argument,       0, 'h' },
         { "installed", required_argument, 0, 'I' },
