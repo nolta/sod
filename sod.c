@@ -283,12 +283,14 @@ struct sod_mode_name {
 int
 main(int argc, char *argv[])
 {
+    char *arch = getenv("__sod_arch");
     char *repos = getenv("__sod_repos");
     char *installed = getenv("__sod_installed");
     int verbose = 0;
 
-    const char *shortopts = "hI:r:vV";
+    const char *shortopts = "a:hI:r:vV";
     const struct option longopts[] = {
+        { "arch",      required_argument, 0, 'a' },
         { "help",      no_argument,       0, 'h' },
         { "installed", required_argument, 0, 'I' },
         { "repos",     required_argument, 0, 'r' },
@@ -303,6 +305,9 @@ main(int argc, char *argv[])
         int c = getopt_long(argc, argv, shortopts, longopts, 0);
         if (c == -1) break;
         switch (c) {
+        case 'a':
+            arch = optarg;
+            break;
         case 'h':
             for (const char **line = usage; *line; line++)
                 echo("%s", *line);
@@ -385,8 +390,8 @@ main(int argc, char *argv[])
     // create & initialize pool
     Pool *pool = pool_create();
     pool->debugmask |= SOLV_DEBUG_TO_STDERR;
+    pool_setarchpolicy(pool, arch);
     pool_setdebuglevel(pool, verbose);
-    pool_setarch(pool, 0); // unset
     /* global */ SOLVABLE_SCRIPT = pool_str2id(pool, "solvable:script", 1);
     Id SOLVABLE_SOURCEID = pool_str2id(pool, "solvable:sourceid", 1);
 
