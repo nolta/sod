@@ -12,15 +12,18 @@ unset ${!__sod_*}
 + PATH /a/b/c
 = XYZ /x/y/z
 ____
-./sodrepo -r $repo add intel 13.1.1 1 x86_64 "" <<<""
-./sodrepo -r $repo add intel 14.0.4 1 x86_64 "" <<<""
-./sodrepo -r $repo add intel 15.0.2 1 x86_64 "" <<<""
-./sodrepo -r $repo add intel 15.0.2 2 x86_64 "" <<<""
-./sodrepo -r $repo add intel 15.0.6 1 x86_64 "" <<<""
-./sodrepo -r $repo add hdf5-intel 1.8.11 1 x86_64 "" \
-    --requires='intel' --provides='libhdf5.so.7' <<<""
-./sodrepo -r $repo add hdf5-intel 1.8.14 1 x86_64 "" \
-    --requires='intel >= 14.0.1; intel < 15' --provides='libhdf5.so.8' <<<""
+
+function addpkg() {
+    ./sodrepo -r $repo add "$@" x86_64 '' <<<''
+}
+addpkg intel 13.1.1 1
+addpkg intel 14.0.4 1
+addpkg intel 15.0.2 1
+addpkg intel 15.0.2 2
+addpkg intel 15.0.6 1
+addpkg hdf5-intel 1.8.11 1 --requires='intel' --provides='libhdf5.so.7'
+addpkg hdf5-intel 1.8.14 1 --requires='intel >= 14.0.1; intel < 15' \
+    --provides='libhdf5.so.8'
 
 cmp <(./sod -r $repo load intel) <<____
 echo loading intel-16.0.2-1.x86_64@test
