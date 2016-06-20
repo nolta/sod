@@ -1,8 +1,6 @@
 
 function __sod_push() {
-    local IFS=':'
-    local a=("$2" ${!1-})
-    export "$1=${a[*]}"
+    export "$1=$2${!1:+:}${!1-}"
 }
 
 function __sod_pop() {
