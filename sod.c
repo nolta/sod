@@ -43,7 +43,6 @@ error(const char *fmt, ...)
 void
 echo(const char *fmt, ...)
 {
-    // TBD: escape quotes
     va_list args;
     va_start(args, fmt);
     printf("echo ");

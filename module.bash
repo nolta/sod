@@ -25,7 +25,10 @@ function __sod_unset() {
 
 function module() {
     while read line; do
-        eval "$line"
+        case "$line" in
+            'echo '*) echo "${line:5}" ;;
+            *) eval "$line" ;;
+        esac
     done < <(sod "$@")
 }
 
