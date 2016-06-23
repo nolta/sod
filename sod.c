@@ -359,6 +359,7 @@ main(int argc, char *argv[])
         { "purge",     PURGE },
         { "rm",        UNLOAD },
         { "swap",      SWAP },
+        { "switch",    SWAP },
         { "uninstall", UNLOAD },
         { "unload",    UNLOAD },
         { "unuse",     UNUSE },
