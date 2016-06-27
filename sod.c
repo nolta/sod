@@ -482,18 +482,15 @@ main(int argc, char *argv[])
     if (mode == AVAIL || mode == LIST || mode == SEARCH) {
         Queue q;
         queue_init(&q);
-        for (int i = 0; i < jobs.count; i += 2) {
-            pool_job2solvables(pool, &q, jobs.elements[i], jobs.elements[i+1]);
-            for (int j = 0; j < q.count; j++) {
-                Id p = q.elements[j];
-                Solvable *s = pool_id2solvable(pool, p);
-                if (mode == AVAIL && s->repo == pool->installed)
-                    continue;
-                const char *str = pool_solvable2str(pool, s);
-                  //  *sum = solvable_lookup_str(s, SOLVABLE_SUMMARY);
-                echo("%s", str); // TBD: sort
-            }
-            queue_empty(&q);
+        selection_solvables(pool, &jobs, &q);
+        for (int j = 0; j < q.count; j++) {
+            Id p = q.elements[j];
+            Solvable *s = pool_id2solvable(pool, p);
+            if (mode == AVAIL && s->repo == pool->installed)
+                continue;
+            const char *str = pool_solvable2str(pool, s);
+              //  *sum = solvable_lookup_str(s, SOLVABLE_SUMMARY);
+            echo("%s", str); // TBD: sort
         }
         queue_free(&q);
         return 0;
