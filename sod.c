@@ -257,6 +257,7 @@ enum sod_mode {
     LIST,
     LOAD,
     PURGE,
+    SEARCH,
     SWAP,
     UNLOAD,
     UNUSE,
@@ -268,6 +269,7 @@ const int NEEDS_ARGS = 1 << 0;
 
 static int sod_mode_flags[NUM_SOD_MODES] = {
     [LOAD]    = NEEDS_ARGS,
+    [SEARCH]  = NEEDS_ARGS,
     [SWAP]    = NEEDS_ARGS,
     [UNLOAD]  = NEEDS_ARGS,
     [UNUSE]   = NEEDS_ARGS,
@@ -358,6 +360,7 @@ main(int argc, char *argv[])
         { "install",   LOAD },
         { "purge",     PURGE },
         { "rm",        UNLOAD },
+        { "search",    SEARCH },
         { "swap",      SWAP },
         { "switch",    SWAP },
         { "uninstall", UNLOAD },
@@ -440,12 +443,28 @@ main(int argc, char *argv[])
         queue_init(&sel);
         for (; optind < argc; optind++) {
             const char *arg = argv[optind];
-            selection_make(pool, &sel, arg, selflags);
-            if (!sel.count) error("no match for '%s'", arg);
-            for (int i = 0; i < sel.count; i++) {
-                queue_push(&jobs, sel.elements[i]);
+            if (mode == SEARCH) {
+                Dataiterator di;
+                dataiterator_init(&di, pool, 0, 0, 0, arg,
+                    SEARCH_SUBSTRING | SEARCH_NOCASE);
+                const int keys[] =
+                    { SOLVABLE_NAME, SOLVABLE_SUMMARY, SOLVABLE_DESCRIPTION };
+                for (int i = 0; i < 3; i++) {
+                    dataiterator_set_keyname(&di, keys[i]);
+                    dataiterator_set_search(&di, 0, 0);
+                    while (dataiterator_step(&di)) {
+                        queue_push2(&jobs, SOLVER_SOLVABLE, di.solvid);
+                    }
+                }
+                dataiterator_free(&di);
+            } else {
+                selection_make(pool, &sel, arg, selflags);
+                if (!sel.count) error("no match for '%s'", arg);
+                for (int i = 0; i < sel.count; i++) {
+                    queue_push(&jobs, sel.elements[i]);
+                }
+                queue_empty(&sel);
             }
-            queue_empty(&sel);
         }
         queue_free(&sel);
 
@@ -460,7 +479,7 @@ main(int argc, char *argv[])
         selection_filter(pool, &jobs, &repofilter);
     }
 
-    if (mode == AVAIL || mode == LIST) {
+    if (mode == AVAIL || mode == LIST || mode == SEARCH) {
         Queue q;
         queue_init(&q);
         for (int i = 0; i < jobs.count; i += 2) {

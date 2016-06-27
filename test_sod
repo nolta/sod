@@ -81,5 +81,9 @@ echo loading gcc-5.2.0-1.x86_64@test
 echo loading hdf5-gcc-1.8.11-1.x86_64@test
 ____
 
+cmp <(./sod -r $repo search summary) <<____
+echo intel-16.0.2-1.x86_64
+____
+
 echo OK
 exit 0
