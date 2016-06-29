@@ -24,7 +24,20 @@
 
 Id SOLVABLE_SCRIPT = 0;
 const char *usage[] = {
-    "Usage: sod [OPTION]... [NAME]...",
+    "Usage: sod [OPTION]... COMMAND [ARG]...",
+    "",
+    "Options:",
+    "  -h, --help",
+    "  -V, --version",
+    "",
+    "Commands:",
+    "  avail",
+    "  list",
+    "  load",
+    "  purge",
+    "  swap",
+    "  unload",
+    "  use",
     NULL
 };
 
