@@ -127,3 +127,11 @@ unloads and loads the dependencies:
     loading gcc-5.2.0-1.x86_64@test
     loading hdf5-gcc-1.8.11-1.x86_64@test
 
+Furthermore, if the `intel` module is already loaded, and we ask to load
+`hdf5`, sod can install the right module:
+
+    $ module load intel
+    loading intel-16.0.2-1.x86_64@test
+    $ module load hdf5
+    loading hdf5-intel-1.8.11-1.x86_64@test
+
