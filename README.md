@@ -68,7 +68,7 @@ and a script that when loaded does two things:
 
 2. sets the environment variable BAR to '/x/y/z'
 
-## The module command
+### The module command
 
 Now let's load the `module` command:
 
@@ -104,7 +104,7 @@ List all loaded modules:
 ### Dependencies
 
 For a more complex example, let's add the following four packages
-(stripping out irrelevant details):
+(omitting irrelevant details):
 
     $ sodrepo add gcc --provides='compiler'
     $ sodrepo add intel --provides='compiler'
