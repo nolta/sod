@@ -13,7 +13,7 @@ before_install:
   - cd libsolv
   - mkdir build
   - cd build
-  - cmake -DCMAKE_INSTALL_PREFIX:PATH=../../local ..
+  - cmake -DCMAKE_INSTALL_PREFIX:PATH=$HOME/local ..
   - make install
   - cd ../..
 
