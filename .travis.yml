@@ -1,0 +1,20 @@
+language: c
+
+matrix:
+  include:
+    - os: linux
+      compiler: gcc
+      packages:
+        - libsqlite3-dev
+
+before_install:
+  - mkdir local
+  - git clone git://github.com/nolta/libsolv -b export-testcase_str2solvid
+  - cd libsolv
+  - mkdir build
+  - cd build
+  - cmake -DCMAKE_INSTALL_PREFIX:PATH=../local ..
+  - make install
+  - cd ../..
+
+script: make prefix=local test
