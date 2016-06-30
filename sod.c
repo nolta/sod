@@ -278,7 +278,9 @@ enum sod_mode {
     NUM_SOD_MODES
 };
 
-const int NEEDS_ARGS = 1 << 0;
+enum sod_mode_flag {
+    NEEDS_ARGS = 1 << 0
+};
 
 static int sod_mode_flags[NUM_SOD_MODES] = {
     [LOAD]    = NEEDS_ARGS,
