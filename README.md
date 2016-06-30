@@ -1,5 +1,7 @@
 # Sod
 
+[![Build Status](https://travis-ci.org/nolta/sod.svg?branch=master)](https://travis-ci.org/nolta/sod)
+
 *Status: alpha / experimental*
 
 Sod is an environment module system like
