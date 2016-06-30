@@ -8,13 +8,14 @@ matrix:
         - libsqlite3-dev
 
 before_install:
-  - mkdir local
+  - prefix=$HOME/local
+  - mkdir $prefix
   - git clone git://github.com/nolta/libsolv -b export-testcase_str2solvid
   - cd libsolv
   - mkdir build
   - cd build
-  - cmake -DCMAKE_INSTALL_PREFIX:PATH=$HOME/local ..
+  - cmake -DCMAKE_INSTALL_PREFIX:PATH=$prefix ..
   - make install
   - cd ../..
 
-script: make prefix=local test
+script: make prefix=$prefix test
