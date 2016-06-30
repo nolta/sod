@@ -1,13 +1,12 @@
 language: c
+sudo: false
 
 matrix:
   include:
     - os: linux
-      compiler: gcc
-      packages:
-        - libsqlite3-dev
+    - os: osx
 
-before_install:
+install:
   - prefix=$HOME/local
   - mkdir $prefix
   - git clone git://github.com/nolta/libsolv -b export-testcase_str2solvid
