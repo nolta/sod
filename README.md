@@ -148,7 +148,7 @@ These constraints can also be used with some of the module commands:
 
 1. *How can i save the currently loaded modules, and reload them later?*
 
-    $ module list > my_modules.txt
-    ...
-    $ module load $(cat my_modules.txt)
+        $ module list > my_modules.txt
+        ...
+        $ module load $(cat my_modules.txt)
 
