@@ -16,7 +16,8 @@ for linux package managers, to resolve module dependencies.
 of directories, sod stores them in a single file. This allows logging changes,
 and cuts down on IOPS.
 
-* **declarative syntax**
+* **declarative syntax**: this guarantees modules can have no side-effects
+beyond modifying the environment.
 
 ## Prerequisites
 
@@ -80,7 +81,7 @@ Point sod at our repo file:
 
     $ module use test.repo
 
-Let's see what modules are available:
+See what modules are available:
 
     $ module avail
     X-1.0-1.x86
@@ -134,4 +135,12 @@ Furthermore, if the `intel` module is already loaded, and we ask to load
     loading intel-16.0.2-1.x86_64@test
     $ module load hdf5
     loading hdf5-intel-1.8.11-1.x86_64@test
+
+Dependencies can constrain versions, for example:
+
+    --requires='intel >= 15.1'
+
+These constraints can also be used with some of the module commands:
+
+    $ module avail 'intel < 16'
 
