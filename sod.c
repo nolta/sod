@@ -410,7 +410,11 @@ main(int argc, char *argv[])
     if (mode == USE || mode == UNUSE) {
         const char *action = (mode == USE) ? "__sod_push" : "__sod_pop";
         for (; optind < argc; optind++) {
-            printf("%s __sod_repos '%s'\n", action, argv[optind]);
+            const char *path = realpath(argv[optind], NULL);
+            if (path) {
+                printf("%s __sod_repos '%s'\n", action, path);
+                free((void *)path);
+            }
         }
         return 0;
     }
