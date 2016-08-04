@@ -297,6 +297,18 @@ struct sod_mode_name {
 };
 
 int
+pstrcmp(const void *p, const void *q)
+{
+    return strcmp(*(const char **)p, *(const char **)q);
+}
+
+void
+sort_strings(const char **strings, size_t n)
+{
+    qsort(strings, n, sizeof(char *), pstrcmp);
+}
+
+int
 main(int argc, char *argv[])
 {
     char *arch = getenv("__sod_arch");
@@ -498,6 +510,7 @@ main(int argc, char *argv[])
         Queue q;
         queue_init(&q);
         selection_solvables(pool, &jobs, &q);
+        const char **strs = (const char **) malloc(q.count * sizeof(char *));
         for (int j = 0; j < q.count; j++) {
             Id p = q.elements[j];
             Solvable *s = pool_id2solvable(pool, p);
@@ -505,8 +518,14 @@ main(int argc, char *argv[])
                 continue;
             const char *str = pool_solvable2str(pool, s);
               //  *sum = solvable_lookup_str(s, SOLVABLE_SUMMARY);
-            echo("%s", str); // TBD: sort
+            strs[j] = strdup(str);
         }
+        sort_strings(strs, q.count);
+        for (int j = 0; j < q.count; j++) {
+            echo("%s", strs[j]);
+            free((void *)strs[j]);
+        }
+        free(strs);
         queue_free(&q);
         return 0;
     }
