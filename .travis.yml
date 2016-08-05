@@ -9,11 +9,11 @@ matrix:
 install:
   - prefix=$HOME/local
   - mkdir $prefix
-  - git clone git://github.com/nolta/libsolv -b export-testcase_str2solvid
+  - git clone git://github.com/openSUSE/libsolv
   - cd libsolv
   - mkdir build
   - cd build
-  - cmake -DCMAKE_INSTALL_PREFIX:PATH=$prefix ..
+  - cmake -DCMAKE_INSTALL_PREFIX:PATH=$prefix -DDISABLE_SHARED:BOOL=ON ..
   - make install
   - cd ../..
 

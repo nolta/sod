@@ -7,7 +7,7 @@ rpaths     = '$$ORIGIN/../lib64' '$$ORIGIN/../lib'
 
 CFLAGS     = -Wall -std=gnu99
 CPPFLAGS   = $(addprefix -I,$(incdirs))
-LDFLAGS    = $(addprefix -L,$(libdirs)) -lsolvext -lsolv -lsqlite3
+LDFLAGS    = $(addprefix -L,$(libdirs)) -lsolvext -lsolv -lsqlite3 -lz
 
 -include config.mk
 

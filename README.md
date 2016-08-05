@@ -32,7 +32,22 @@ beyond modifying the environment.
 
 ## Building
 
-    $ echo 'prefix = /path/to/dir' > config.mk
+First, decide on the destination:
+
+    $ prefix="/path/to/dir"
+
+Next, build the static version of libsolv:
+
+    $ git clone git://github.com/openSUSE/libsolv
+    $ cd libsolv
+    $ mkdir build
+    $ cd build
+    $ cmake -DCMAKE_INSTALL_PREFIX:PATH=$prefix -DDISABLE_SHARED:BOOL=ON ..
+    $ make install
+
+Finally, build sod:
+
+    $ echo "prefix = $prefix" > config.mk
     $ make
     $ make test
     $ make install
