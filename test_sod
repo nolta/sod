@@ -53,6 +53,12 @@ __sod_pop PATH '/a/b/c'
 __sod_pop __sod_installed 'intel-16.0.2-1.x86_64@test'
 ____
 
+set +E
+cmp <(./sod -r $repo -I intel-16.0.2-1.x86_64@test install intel-15.0.2 2>&1) <<____
+sod: intel-16.0.2-1.x86_64@installed is already installed
+____
+set -E
+
 cmp <(./sod -r $repo -I intel-16.0.2-1.x86_64@test purge | grep unload) <<____
 echo unloading intel-16.0.2-1.x86_64@test
 ____

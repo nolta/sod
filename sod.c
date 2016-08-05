@@ -536,8 +536,7 @@ main(int argc, char *argv[])
 
     Solver *solv = solver_create(pool);
     solver_set_flag(solv, SOLVER_FLAG_ALLOW_NAMECHANGE, 1);
-    if (mode == PURGE || mode == SWAP)
-        solver_set_flag(solv, SOLVER_FLAG_ALLOW_UNINSTALL, 1);
+    solver_set_flag(solv, SOLVER_FLAG_ALLOW_UNINSTALL, 1);
 
     int how = (mode == PURGE) ? 0 : SOLVER_SOLVABLE_NAME;
     switch (mode) {
@@ -550,7 +549,7 @@ main(int argc, char *argv[])
         how |= SOLVER_ERASE;
         break;
     default:
-        error("internal error %d", mode);
+        error("internal error: unhandled mode %d", mode);
     }
 
     for (int i = 0; i < jobs.count; i += 2) {
@@ -584,10 +583,42 @@ main(int argc, char *argv[])
         Transaction *trans = solver_create_transaction(solv);
         transaction_order(trans, 0);
 
-        for (int j = 0; j < trans->steps.count; j++)
+        int m = 0, n = trans->steps.count;
+        Id *ids = (Id *) calloc(n, sizeof(Id));
+        Id *types = (Id *) calloc(n, sizeof(Id));
+        for (int i = 0; i < n; i++)
         {
-            Id p = trans->steps.elements[j];
-            Id type = transaction_type(trans, p, SOLVER_TRANSACTION_RPM_ONLY);
+            Id p = trans->steps.elements[i];
+            Id type = transaction_type(trans, p, 0);
+            switch (type) {
+            case SOLVER_TRANSACTION_IGNORE:
+                break;
+            case SOLVER_TRANSACTION_ERASE:
+            case SOLVER_TRANSACTION_INSTALL:
+                types[m] = type;
+                ids[m++] = p;
+                break;
+            case SOLVER_TRANSACTION_DOWNGRADED:
+            case SOLVER_TRANSACTION_UPGRADED:
+                if (mode != SWAP) {
+                    const char *str = testcase_solvid2str(pool, p);
+                    error("%s is already installed", str);
+                }
+                types[m] = SOLVER_TRANSACTION_ERASE;
+                ids[m++] = p;
+                types[m] = SOLVER_TRANSACTION_INSTALL;
+                ids[m++] = transaction_obs_pkg(trans, p);
+                break;
+            default:
+                error("internal error: unhandled transaction %d", type);
+                break;
+            }
+        }
+
+        for (int i = 0; i < m; i++)
+        {
+            Id p = ids[i];
+            Id type = types[i];
             Solvable *s = pool_id2solvable(pool, p);
             if (type == SOLVER_TRANSACTION_ERASE) {
                 p = solvable_lookup_id(s, SOLVABLE_SOURCEID);
@@ -615,6 +646,8 @@ main(int argc, char *argv[])
             free(cmds);
         }
 
+        free((void *)ids);
+        free((void *)types);
         transaction_free(trans);
     }
 
