@@ -227,7 +227,7 @@ parse_script(const char *script, int *ncmds)
     *ncmds = 0;
     if (!script) return NULL;
     size_t maxcmds = 4;
-    cmd_t *cmds = (cmd_t *)malloc(maxcmds*sizeof(cmd_t));
+    cmd_t *cmds = (cmd_t *) calloc(maxcmds, sizeof(cmd_t));
 
     const char *s = script;
     while (*s) {
@@ -514,7 +514,7 @@ main(int argc, char *argv[])
         Queue q;
         queue_init(&q);
         selection_solvables(pool, &jobs, &q);
-        const char **strs = (const char **) malloc(q.count * sizeof(char *));
+        const char **strs = (const char **) calloc(q.count, sizeof(char *));
         for (int j = 0; j < q.count; j++) {
             Id p = q.elements[j];
             Solvable *s = pool_id2solvable(pool, p);
