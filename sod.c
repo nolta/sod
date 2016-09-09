@@ -425,7 +425,7 @@ main(int argc, char *argv[])
     Pool *pool = pool_create();
     pool->debugmask |= SOLV_DEBUG_TO_STDERR;
     pool_setarchpolicy(pool, arch);
-    pool_setdebuglevel(pool, verbose);
+    pool_setdebuglevel(pool, (verbose) ? verbose - 1 : 0);
     /* global */ SOLVABLE_SCRIPT = pool_str2id(pool, "solvable:script", 1);
     Id SOLVABLE_SOURCEID = pool_str2id(pool, "solvable:sourceid", 1);
 
