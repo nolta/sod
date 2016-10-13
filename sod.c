@@ -557,19 +557,18 @@ main(int argc, char *argv[])
     }
 
     int nprobs = solver_solve(solv, &jobs);
-    if (nprobs)
-    {
+    if (nprobs) {
         if (nprobs > 1) fprintf(stderr, "Found %d probs:\n", nprobs);
-        for (int prob = 1; prob <= nprobs; prob++)
-        {
+
+        for (int prob = 1; prob <= nprobs; prob++) {
             fprintf(stderr, "Problem");
             if (nprobs > 1) fprintf(stderr, " %d", prob);
             fprintf(stderr, ":\n");
             solver_printprobleminfo(solv, prob);
             fprintf(stderr, "\n");
+
             int nsols = solver_solution_count(solv, prob);
-            for (int sol = 1; sol <= nsols; sol++)
-            {
+            for (int sol = 1; sol <= nsols; sol++) {
                 fprintf(stderr, "Solution");
                 if (nsols > 1) fprintf(stderr, " %d", sol);
                 fprintf(stderr, ":\n");
@@ -577,19 +576,19 @@ main(int argc, char *argv[])
                 if (sol < nsols) fprintf(stderr, "\n");
             }
         }
-    }
-    else
-    {
+
+    } else {
         Transaction *trans = solver_create_transaction(solv);
         transaction_order(trans, 0);
 
         int m = 0, n = trans->steps.count;
         Id *ids = (Id *) calloc(n, sizeof(Id));
         Id *types = (Id *) calloc(n, sizeof(Id));
-        for (int i = 0; i < n; i++)
-        {
+
+        for (int i = 0; i < n; i++) {
             Id p = trans->steps.elements[i];
             Id type = transaction_type(trans, p, 0);
+
             switch (type) {
             case SOLVER_TRANSACTION_IGNORE:
                 break;
@@ -615,11 +614,11 @@ main(int argc, char *argv[])
             }
         }
 
-        for (int i = 0; i < m; i++)
-        {
+        for (int i = 0; i < m; i++) {
             Id p = ids[i];
             Id type = types[i];
             Solvable *s = pool_id2solvable(pool, p);
+
             if (type == SOLVER_TRANSACTION_ERASE) {
                 p = solvable_lookup_id(s, SOLVABLE_SOURCEID);
                 s = pool_id2solvable(pool, p);
