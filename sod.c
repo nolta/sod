@@ -138,11 +138,6 @@ sod_str2solvid(Pool *pool, const char *str)
     return 0;
 }
 
-typedef struct {
-    const char *ptr;
-    int len;
-} substring_t;
-
 char *
 repo_name_from_filename(const char *filename)
 {
@@ -249,6 +244,11 @@ solvable_copy(Solvable *s1, Solvable *s2)
     ADDIDS(enhances)
 #undef ADDIDS
 }
+
+typedef struct {
+    const char *ptr;
+    int len;
+} substring_t;
 
 typedef enum {
     SOD_OP_ADD = '+',
