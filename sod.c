@@ -64,6 +64,80 @@ echo(const char *fmt, ...)
     va_end(args);
 }
 
+const char *
+sod_solvid2str(Pool *pool, Id p, int withrepo)
+{
+    Solvable *s = pool->solvables + p;
+    const char *n, *e, *a;
+
+    n = pool_id2str(pool, s->name);
+    e = pool_id2str(pool, s->evr);
+    a = pool_id2str(pool, s->arch);
+    char *str = pool_alloctmpspace(pool, strlen(n) + strlen(e) + strlen(a) + 3);
+    sprintf(str, "%s/%s.%s", n, e, a);
+    if (!withrepo || !s->repo)
+        return str;
+    if (s->repo->name)
+        return pool_tmpappend(pool, str, "@", s->repo->name);
+
+    char buf[20];
+    sprintf(buf, "@#%d", s->repo->repoid);
+    return pool_tmpappend(pool, str, buf, 0);
+}
+
+Id
+sod_str2solvid(Pool *pool, const char *str)
+{
+    int i, l = strlen(str);
+    if (!l)
+        return 0;
+
+    // find repo (if present)
+    Repo *repo = NULL;
+    for (i=l-1; i >= 0; i--) {
+        if (str[i] == '@' && (repo = testcase_str2repo(pool, str+i+1)) != 0)
+            break;
+    }
+    if (i < 0)
+        i = l;
+    int repostart = i;
+
+    // find the arch (if present)
+    Id arch = 0;
+    for (i=repostart-1; i > 0; i--) {
+        if (str[i] == '.') {
+            arch = pool_strn2id(pool, str+i+1, repostart-(i+1), 0);
+            if (arch)
+                repostart = i;
+            break;
+        }
+    }
+
+    // find the name
+    for (i=repostart-1; i > 0; i--) {
+        if (str[i] == '/') {
+            Id nid, evrid, p, pp;
+            nid = pool_strn2id(pool, str, i, 0);
+            if (!nid)
+                continue;
+            evrid = pool_strn2id(pool, str+i+1, repostart-(i+1), 0);
+            if (!evrid)
+                continue;
+            FOR_PROVIDES(p, pp, nid) {
+                Solvable *s = pool->solvables + p;
+                if (s->name != nid || s->evr != evrid)
+                    continue;
+                if (repo && s->repo != repo)
+                    continue;
+                if (arch && s->arch != arch)
+                    continue;
+                return p;
+            }
+        }
+    }
+    return 0;
+}
+
 typedef struct {
     const char *ptr;
     int len;
@@ -445,11 +519,11 @@ main(int argc, char *argv[])
     pool_addfileprovides(pool);
     pool_createwhatprovides(pool);
     FORTOKEN(pkg, (installed) ? strdup(installed) : 0, ":") {
-        // Have to create new Solvable *before* searching because Solvable
-        // pointers are invalidated when creating/deleting other Solvables.
+        /* Have to create new Solvable *before* searching because Solvable
+           pointers are invalidated when creating/deleting other Solvables. */
         Id p2 = repo_add_solvable(installed_repo);
         Solvable *s2 = pool_id2solvable(pool, p2);
-        Id p = testcase_str2solvid(pool, pkg);
+        Id p = sod_str2solvid(pool, pkg);
         if (!p) error("can't find '%s'", pkg);
         Solvable *s = pool_id2solvable(pool, p);
         solvable_copy(s, s2);
@@ -490,6 +564,15 @@ main(int argc, char *argv[])
                 dataiterator_free(&di);
             } else {
                 selection_make(pool, &sel, arg, selflags);
+                if (!sel.count && strchr(arg, '/')) {
+                    // HACK: replace '/' -> '-', and retry selection_make
+                    char *arg2 = strdup(arg);
+                    char *p = arg2;
+                    while ((p = strchr(p, '/')))
+                        *p++ = '-';
+                    selection_make(pool, &sel, arg2, selflags);
+                    free(arg2);
+                }
                 if (!sel.count) error("no match for '%s'", arg);
                 for (int i = 0; i < sel.count; i++) {
                     queue_push(&jobs, sel.elements[i]);
@@ -520,7 +603,7 @@ main(int argc, char *argv[])
             Solvable *s = pool_id2solvable(pool, p);
             if (mode == AVAIL && s->repo == pool->installed)
                 continue;
-            const char *str = pool_solvable2str(pool, s);
+            const char *str = sod_solvid2str(pool, p, 0);
               //  *sum = solvable_lookup_str(s, SOLVABLE_SUMMARY);
             strs[j] = strdup(str);
         }
@@ -600,7 +683,7 @@ main(int argc, char *argv[])
             case SOLVER_TRANSACTION_DOWNGRADED:
             case SOLVER_TRANSACTION_UPGRADED:
                 if (mode != SWAP) {
-                    const char *str = testcase_solvid2str(pool, p);
+                    const char *str = sod_solvid2str(pool, p, 1);
                     error("%s is already installed", str);
                 }
                 types[m] = SOLVER_TRANSACTION_ERASE;
@@ -623,7 +706,7 @@ main(int argc, char *argv[])
                 p = solvable_lookup_id(s, SOLVABLE_SOURCEID);
                 s = pool_id2solvable(pool, p);
             }
-            const char *str = testcase_solvid2str(pool, p);
+            const char *str = sod_solvid2str(pool, p, 1);
             const char *script = solvable_lookup_str(s, SOLVABLE_SCRIPT);
 
             int ncmds = 0;

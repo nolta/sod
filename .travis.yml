@@ -13,7 +13,7 @@ install:
   - cd libsolv
   - mkdir build
   - cd build
-  - cmake -DCMAKE_INSTALL_PREFIX:PATH=$prefix -DDISABLE_SHARED:BOOL=ON ..
+  - cmake -DCMAKE_INSTALL_PREFIX:PATH=$prefix ..
   - make install
   - cd ../..
 

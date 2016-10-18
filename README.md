@@ -42,7 +42,7 @@ Next, build the static version of libsolv:
     $ cd libsolv
     $ mkdir build
     $ cd build
-    $ cmake -DCMAKE_INSTALL_PREFIX:PATH=$prefix -DDISABLE_SHARED:BOOL=ON ..
+    $ cmake -DCMAKE_INSTALL_PREFIX:PATH=$prefix ..
     $ make install
 
 Finally, build sod:
@@ -99,12 +99,12 @@ Point sod at our repo file:
 See what modules are available:
 
     $ module avail
-    X-1.0-1.x86
+    X/1.0-1.x86
 
 Load a module:
 
     $ module load X
-    loading X-1.0-1.x86@test
+    loading X/1.0-1.x86@test
 
 After loading, the environment variables `FOO` and `BAR` are changed:
 
@@ -115,7 +115,7 @@ After loading, the environment variables `FOO` and `BAR` are changed:
 List all loaded modules:
 
     $ module list
-    X-1.0-1.x86
+    X/1.0-1.x86
 
 ### Dependencies
 
@@ -131,25 +131,25 @@ Now when we load the `hdf5-intel` module the `intel` module is automatically
 installed:
 
     $ module load hdf5-intel
-    loading intel-16.0.2-1.x86_64@test
-    loading hdf5-intel-1.8.11-1.x86_64@test
+    loading intel/16.0.2-1.x86_64@test
+    loading hdf5-intel/1.8.11-1.x86_64@test
 
 Likewise, if we swap out `hdf5-intel` for `hdf5-gcc`, sod automatically
 unloads and loads the dependencies:
 
     $ module swap hdf5-gcc
-    unloading hdf5-intel-1.8.11-1.x86_64@test
-    unloading intel-16.0.2-1.x86_64@test
-    loading gcc-5.2.0-1.x86_64@test
-    loading hdf5-gcc-1.8.11-1.x86_64@test
+    unloading hdf5-intel/1.8.11-1.x86_64@test
+    unloading intel/16.0.2-1.x86_64@test
+    loading gcc/5.2.0-1.x86_64@test
+    loading hdf5-gcc/1.8.11-1.x86_64@test
 
 Furthermore, if the `intel` module is already loaded, and we ask to load
 `hdf5`, sod can install the right module:
 
     $ module load intel
-    loading intel-16.0.2-1.x86_64@test
+    loading intel/16.0.2-1.x86_64@test
     $ module load hdf5
-    loading hdf5-intel-1.8.11-1.x86_64@test
+    loading hdf5-intel/1.8.11-1.x86_64@test
 
 Dependencies can constrain versions, for example:
 
