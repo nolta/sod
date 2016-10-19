@@ -10,7 +10,12 @@ def error(*args):
     print("sodrepo error:", *args, file=sys.stderr)
     sys.exit(1)
 
-create_table_packages_sql = """\
+create_meta_table_stmt = """\
+create table meta (
+  key text not null unique,
+  val text not null)"""
+
+create_packages_table_stmt = """\
 create table packages (
   name text not null,
   version text not null,
@@ -25,8 +30,13 @@ create table packages (
 def create_repo(filename):
     if os.path.exists(filename):
         error("repo", filename, "exists")
+    name,_ = os.path.splitext(os.path.basename(filename))
     conn = sqlite3.connect(filename)
-    conn.execute(create_table_packages_sql)
+    conn.execute(create_meta_table_stmt)
+    conn.execute(create_packages_table_stmt)
+    meta = { 'name':  name }
+    for k,v in meta.items():
+        conn.execute('insert into meta values (?,?)', (k,v))
     conn.commit()
     conn.close()
 

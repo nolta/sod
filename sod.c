@@ -138,33 +138,27 @@ sod_str2solvid(Pool *pool, const char *str)
     return 0;
 }
 
-char *
-repo_name_from_filename(const char *filename)
-{
-    const char *a = strrchr(filename, '/');
-    a = (a) ? a + 1 : filename;
-    if (!*a) return 0;
-    const char *b = strchr(a, '.');
-    return (b) ? strndup(a, b-a) : strdup(a);
-}
-
 #define FORTOKEN(TOK, STR, SEP) \
     for (char *_=0, *TOK=strtok_r(STR,SEP,&_); TOK; TOK=strtok_r(0,SEP,&_))
 
 Repo *
-repo_add(Pool *pool, const char *filename)
+sod_repo_load(Pool *pool, const char *filename)
 {
-    char *name = repo_name_from_filename(filename);
-    if (!name) error("%s is a directory", filename);
-    Repo *repo = repo_create(pool, name);
-    Repodata *data = repo_add_repodata(repo, 0);
-    free(name);
-
     sqlite3 *db = NULL;
     sqlite3_open_v2(filename, &db, SQLITE_OPEN_READONLY, NULL);
+
     sqlite3_stmt *stmt = NULL;
+    sqlite3_prepare_v2(db, "select val from meta where key='name'", -1, &stmt, NULL);
+    assert(sqlite3_step(stmt) == SQLITE_ROW);
+    const char *name = (const char *)sqlite3_column_text(stmt, 0);
+    Repo *repo = repo_create(pool, name);
+    sqlite3_finalize(stmt);
+
+    Repodata *data = repo_add_repodata(repo, 0);
+
     const char sql[] = "select name,version||'-'||release as evr,arch,provides,requires,summary,script from packages";
     sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+
     while (sqlite3_step(stmt) == SQLITE_ROW) {
         const char
             *pkg = (const char *)sqlite3_column_text(stmt, 0),
@@ -503,12 +497,10 @@ main(int argc, char *argv[])
     /* global */ SOLVABLE_SCRIPT = pool_str2id(pool, "solvable:script", 1);
     Id SOLVABLE_SOURCEID = pool_str2id(pool, "solvable:sourceid", 1);
 
-    // add repos
+    // load repos
     char *tmpstr = strdup(repos);
     FORTOKEN(filename, tmpstr, ":") {
-        Repo *repo = repo_add(pool, filename);
-        repo->priority = 0;
-        repo->subpriority = 0;
+        sod_repo_load(pool, filename);
     }
     free(tmpstr);
 
