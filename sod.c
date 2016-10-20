@@ -590,6 +590,7 @@ main(int argc, char *argv[])
         queue_init(&q);
         selection_solvables(pool, &jobs, &q);
         const char **strs = (const char **) calloc(q.count, sizeof(char *));
+        int nstrs = 0;
         for (int j = 0; j < q.count; j++) {
             Id p = q.elements[j];
             Solvable *s = pool_id2solvable(pool, p);
@@ -597,10 +598,10 @@ main(int argc, char *argv[])
                 continue;
             const char *str = sod_solvid2str(pool, p, 0);
               //  *sum = solvable_lookup_str(s, SOLVABLE_SUMMARY);
-            strs[j] = strdup(str);
+            strs[nstrs++] = strdup(str);
         }
-        sort_strings(strs, q.count);
-        for (int j = 0; j < q.count; j++) {
+        sort_strings(strs, nstrs);
+        for (int j = 0; j < nstrs; j++) {
             echo("%s", strs[j]);
             free((void *)strs[j]);
         }
