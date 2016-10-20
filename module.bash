@@ -32,3 +32,28 @@ function module() {
     done < <(sod "$@")
 }
 
+# tab completion
+
+function _module_tabcomplete() {
+    local cur cmds
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    cmds="avail list load unload use purge search"
+
+    COMPREPLY=()
+    case $COMP_CWORD in
+    0|1)
+        COMPREPLY=( $(compgen -W "$cmds" -- $cur) )
+        ;;
+    *)
+        case ${COMP_WORDS[1]} in
+        load)
+            COMPREPLY=( $(compgen -W "$(sod avail | cut -d' ' -f2)" -- $cur) )
+            ;;
+        unload)
+            COMPREPLY=( $(IFS=: compgen -W "$__sod_installed" -- $cur) )
+            ;;
+        esac
+    esac
+}
+
+complete -F _module_tabcomplete module
