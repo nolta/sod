@@ -9,8 +9,13 @@ unset ${!__sod_*}
 
 ./sodrepo -r $repo create
 ./sodrepo -r $repo add intel 16.0.2 1 x86_64 "summary" --provides='compiler' <<____
-+ PATH /a/b/c
-= XYZ /x/y/z
+
+# comment
++       PATH    /a/b/c 
+  
+# another comment
+=        XYZ    /x/y/z
+
 ____
 
 function addpkg() {

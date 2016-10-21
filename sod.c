@@ -299,21 +299,42 @@ parse_script(const char *script, int *ncmds)
 
     const char *s = script;
     while (*s) {
-        while (*s == ' ') ++s; // skip spaces
+        // skip blank lines & leading spaces
+        s += strspn(s, " \t\n");
+        if (!*s) break;
 
-        char *k = strchr(s, ' ');
-        assert(k);
-        while (*++k == ' '); // skip spaces
+        // ignore comments
+        if (*s == '#') {
+            s += strcspn(s, "\n");
+            continue;
+        }
 
-        char *v = strchr(k, ' ');
-        assert(v);
-        int nk = v - k;
-        while (*++v == ' '); // skip spaces
+        // op
+        const char *o = s;
+        int  no = strcspn(o, " \t");
+        s += no;
+        s += strspn(s, " \t");
 
-        char *n = strchr(v, '\n');
-        if (!n) n = strchr(v, 0);
-        int nv = n - v;
-        while (*n == '\n') ++n; // skip newlines
+        assert(no > 0);
+        assert(s - o > no);
+
+        // key
+        const char *k = s;
+        int  nk = strcspn(k, " \t");
+        s += nk;
+        s += strspn(s, " \t");
+
+        assert(nk > 0);
+        assert(s - k > nk);
+
+        // val
+        const char *v = s;
+        int  nv = strcspn(v, " \t\n");
+        s += nv;
+        s += strspn(s, " \t");
+
+        assert(nv > 0);
+        assert(*s == '\0' || *s == '\n');
 
         if (*ncmds == maxcmds) {
             maxcmds *= 2;
@@ -322,11 +343,9 @@ parse_script(const char *script, int *ncmds)
 
         cmd_t *cmd = cmds + *ncmds;
         *ncmds += 1;
-        cmd->op = *s;
+        cmd->op = *o;
         cmd->key = (substring_t){ k, nk };
         cmd->val = (substring_t){ v, nv };
-
-        s = n;
     }
 
     return cmds;
