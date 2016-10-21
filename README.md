@@ -13,11 +13,15 @@ with the following features:
 for linux package managers, to resolve module dependencies.
 
 * **single-file repositories**: instead of spreading module files over a bunch
-of directories, sod stores them in a single file. This allows logging changes,
-and cuts down on IOPS.
+of directories, sod stores them in a single file. This cuts down on IOPS,
+and speeds things up on shared filesystems.
 
-* **declarative syntax**: this guarantees modules can have no side-effects
-beyond modifying the environment.
+* **declarative syntax**: since modules can be unloaded as well as loaded, sod
+only supports a limited set of reversible operations.
+
+* **no side effects**: modules can only change the environment, nothing else.
+
+* **module versioning**
 
 ## Prerequisites
 
@@ -80,9 +84,9 @@ This adds a module named 'X'; with version '1.0',
 release '1', architecture 'x86', summary 'X marks the spot';
 and a script that when loaded does two things:
 
-1. prepends '/a/b/c' to the environment variable 'FOO'
+1. prepends `/a/b/c` to the environment variable `FOO`
 
-2. sets the environment variable BAR to '/x/y/z'
+2. sets the environment variable BAR to `/x/y/z`
 
 ### The module command
 
@@ -120,7 +124,7 @@ List all loaded modules:
 ### Dependencies
 
 For a more complex example, let's add the following four packages
-(omitting irrelevant details):
+(omitting some arguments for clarity):
 
     $ sodrepo add gcc --provides='compiler'
     $ sodrepo add intel --provides='compiler'
