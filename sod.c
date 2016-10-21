@@ -250,17 +250,28 @@ typedef enum {
 } op_t;
 
 typedef struct {
+    substring_t root;
+} context_t;
+
+typedef struct {
     op_t op;
     substring_t key;
     substring_t val;
+    context_t ctx;
 } cmd_t;
 
 void
 print_cmd(const char *func, cmd_t *cmd)
 {
-    printf("%s %.*s '%.*s\'\n", func,
-        cmd->key.len, cmd->key.ptr,
-        cmd->val.len, cmd->val.ptr);
+    printf("%s %.*s '", func, cmd->key.len, cmd->key.ptr);
+    for (int i = 0; i < cmd->val.len; i++) {
+        char c = cmd->val.ptr[i];
+        if (c == '@')
+            printf("%.*s", cmd->ctx.root.len, cmd->ctx.root.ptr);
+        else
+            printf("%c", c);
+    }
+    printf("'\n");
 }
 
 void
@@ -296,6 +307,7 @@ parse_script(const char *script, int *ncmds)
     if (!script) return NULL;
     size_t maxcmds = 4;
     cmd_t *cmds = (cmd_t *) calloc(maxcmds, sizeof(cmd_t));
+    context_t ctx = {{0}};
 
     const char *s = script;
     while (*s) {
@@ -306,6 +318,18 @@ parse_script(const char *script, int *ncmds)
         // ignore comments
         if (*s == '#') {
             s += strcspn(s, "\n");
+            continue;
+        }
+
+        // root directory
+        if (*s == '@') {
+            s++;
+            s += strspn(s, " \t");
+            int n = strcspn(s, " \t\n");
+            ctx.root = (substring_t){s, n};
+            s += n;
+            s += strspn(s, " \t");
+            assert(*s == '\n');
             continue;
         }
 
@@ -334,7 +358,7 @@ parse_script(const char *script, int *ncmds)
         s += strspn(s, " \t");
 
         assert(nv > 0);
-        assert(*s == '\0' || *s == '\n');
+        assert(*s == '\n' || *s == '\0');
 
         if (*ncmds == maxcmds) {
             maxcmds *= 2;
@@ -346,6 +370,7 @@ parse_script(const char *script, int *ncmds)
         cmd->op = *o;
         cmd->key = (substring_t){ k, nk };
         cmd->val = (substring_t){ v, nv };
+        cmd->ctx = ctx;
     }
 
     return cmds;

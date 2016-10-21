@@ -76,17 +76,19 @@ Next let's add a module. The command is:
 For example:
 
     $ sodrepo test.repo add X 1.0 1 x86 "X marks the spot" <<EOF
-    + FOO /a/b/c
-    = BAR /x/y/z
+    # a comment
+    @ /x/y/z
+    + FOO @/bin
+    = BAR @/lib
     EOF
 
 This adds a module named 'X'; with version '1.0',
 release '1', architecture 'x86', summary 'X marks the spot';
 and a script that when loaded does two things:
 
-1. prepends `/a/b/c` to the environment variable `FOO`
+1. prepends `/x/y/z/bin` to the environment variable `FOO`
 
-2. sets the environment variable BAR to `/x/y/z`
+2. sets the environment variable BAR to `/x/y/z/lib`
 
 ### The module command
 
