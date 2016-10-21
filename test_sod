@@ -11,10 +11,10 @@ unset ${!__sod_*}
 ./sodrepo -r $repo add intel 16.0.2 1 x86_64 "summary" --provides='compiler' <<____
 
 # comment
-+       PATH    /a/b/c 
++	PATH	/a/b/c 
   
 # another comment
-=        XYZ    /x/y/z
+=        XYZ	/x/y/z
 
 ____
 
