@@ -63,15 +63,15 @@ A *repo* is a file containing a set of modules.
 All modifications to repos are done via the `sodrepo` command.
 First, let's create an empty repo named `test.repo`:
 
-    $ sodrepo -r test.repo create
+    $ sodrepo test.repo create
 
 Next let's add a module. The command is:
 
-    $ sodrepo -r FILENAME add NAME VERSION RELEASE ARCH SUMMARY < SCRIPT
+    $ sodrepo FILENAME add NAME VERSION RELEASE ARCH SUMMARY < SCRIPT
 
 For example:
 
-    $ sodrepo -r test.repo add X 1.0 1 x86 "X marks the spot" <<EOF
+    $ sodrepo test.repo add X 1.0 1 x86 "X marks the spot" <<EOF
     + FOO /a/b/c
     = BAR /x/y/z
     EOF

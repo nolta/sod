@@ -3,6 +3,7 @@
 from __future__ import absolute_import, division, print_function
 
 import os
+import re
 import sqlite3
 import sys
 
@@ -27,10 +28,12 @@ create table packages (
   script text not null,
   unique (name,version,release,arch))"""
 
-def create_repo(filename):
+def create_repo(filename, name):
     if os.path.exists(filename):
         error("repo", filename, "exists")
-    name,_ = os.path.splitext(os.path.basename(filename))
+    if re.match("^[a-zA-Z0-9_]+$", name) is None:
+        error("bad name (%s); only letters, numbers, or underscores allowed" % name)
+    print("creating repo '%s' named '%s'" % (filename,name))
     conn = sqlite3.connect(filename)
     conn.execute(create_meta_table_stmt)
     conn.execute(create_packages_table_stmt)
@@ -65,10 +68,11 @@ class SodRepo(object):
 def main():
     import argparse
     parser = argparse.ArgumentParser(prog='sodrepo')
-    parser.add_argument('-r', '--repo')
+    parser.add_argument('filename')
     subparsers = parser.add_subparsers(dest='cmd')
 
     pkg = subparsers.add_parser('create', help='create repo')
+    pkg.add_argument('name', nargs='?', default=None)
 
     pkg = subparsers.add_parser('add', help='add package to repo')
     pkg.add_argument('name')
@@ -82,9 +86,12 @@ def main():
     args = parser.parse_args()
 
     if args.cmd == 'create':
-        create_repo(args.repo)
+        name = args.name
+        if name is None:
+            name,_ = os.path.splitext(os.path.basename(args.filename))
+        create_repo(args.filename, name)
     elif args.cmd == 'add':
-        repo = SodRepo(args.repo)
+        repo = SodRepo(args.filename)
         script = sys.stdin.read().strip()
         repo.add_pkg(args.name, args.version, args.release, args.arch,
             args.summary, script, requires=args.requires, provides=args.provides)
