@@ -264,12 +264,16 @@ void
 print_cmd(const char *func, cmd_t *cmd)
 {
     printf("%s %.*s '", func, cmd->key.len, cmd->key.ptr);
-    for (int i = 0; i < cmd->val.len; i++) {
-        char c = cmd->val.ptr[i];
-        if (c == '@')
-            printf("%.*s", cmd->ctx.root.len, cmd->ctx.root.ptr);
-        else
-            printf("%c", c);
+    if (cmd->ctx.root.len) {
+        for (int i = 0; i < cmd->val.len; i++) {
+            char c = cmd->val.ptr[i];
+            if (c == '@')
+                printf("%.*s", cmd->ctx.root.len, cmd->ctx.root.ptr);
+            else
+                printf("%c", c);
+        }
+    } else {
+        printf("%.*s", cmd->val.len, cmd->val.ptr);
     }
     printf("'\n");
 }

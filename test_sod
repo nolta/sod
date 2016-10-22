@@ -10,6 +10,7 @@ unset ${!__sod_*}
 ./sodrepo $repo create > /dev/null
 ./sodrepo $repo add intel 16.0.2 1 x86_64 "summary" --provides='compiler' <<____
 
+  =  EMAIL  user@host 
 # comment
 @ /x/y/z
 +	PATH	@/bin
@@ -33,6 +34,7 @@ addpkg hdf5-intel 1.8.14 1 --requires='intel >= 14.0.1; intel < 15' \
 
 diff - <(./sod -r $repo load intel) <<____
 echo loading intel/16.0.2-1.x86_64@test
+__sod_set EMAIL 'user@host'
 __sod_push PATH '/x/y/z/bin'
 __sod_set XYZ '/lib:/x/y/z/lib64'
 __sod_push __sod_installed 'intel/16.0.2-1.x86_64@test'
@@ -56,6 +58,7 @@ diff - <(./sod -r $repo -I intel/16.0.2-1.x86_64@test unload intel) <<____
 echo unloading intel/16.0.2-1.x86_64@test
 __sod_unset XYZ '/lib:/x/y/z/lib64'
 __sod_pop PATH '/x/y/z/bin'
+__sod_unset EMAIL 'user@host'
 __sod_pop __sod_installed 'intel/16.0.2-1.x86_64@test'
 ____
 
