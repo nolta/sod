@@ -5,7 +5,7 @@ function __sod_push() {
 
 function __sod_pop() {
     if [[ "${!1}" = "$2" ]]; then
-        export "$1="
+        unset $1
     else
         local x=${!1#$2:}
         if [[ "${!1}" != "$x" ]]; then

@@ -39,7 +39,7 @@ __sod_pop XYZ a
 __sod_pop XYZ d
 [ "$XYZ" == 'b' ]
 __sod_pop XYZ b
-[ "$XYZ" == '' ]
+[ -z ${XYZ+x} ]
 __sod_push XYZ b
 [ "$XYZ" == 'b' ]
 __sod_push XYZ 'x y z'
