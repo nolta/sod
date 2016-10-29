@@ -50,6 +50,9 @@ __sod_pop XYZ 'x y z'
 [ "$XYZ" == 'u $v:b' ]
 __sod_push XYZ 'a:b'
 [ "$XYZ" == 'a:b:u $v:b' ]
+__sod_pop XYZ 'a:b'
+[ "$XYZ" == 'u $v:b' ]
+__sod_push XYZ 'a:b'
 __sod_pop XYZ 'b'
 [ "$XYZ" == 'a:u $v:b' ]
 __sod_pop XYZ 'u $v'

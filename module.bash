@@ -4,15 +4,16 @@ function __sod_push() {
 }
 
 function __sod_pop() {
-    local IFS=':'
-    local a=(${!1})
-    for i in ${!a[@]}; do
-        if [[ "${a[$i]}" == "$2" ]]; then
-            unset a[$i]
-            break
+    if [[ "${!1}" = "$2" ]]; then
+        export "$1="
+    else
+        local x=${!1#$2:}
+        if [[ "${!1}" != "$x" ]]; then
+            export "$1=$x"
+        else
+            export "$1=${!1/:$2/}"
         fi
-    done
-    export "$1=${a[*]-}"
+    fi
 }
 
 function __sod_set() {
