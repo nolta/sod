@@ -40,7 +40,7 @@ First, decide on the destination:
 
     $ prefix="/path/to/dir"
 
-Next, build the static version of libsolv:
+Next, build libsolv:
 
     $ git clone git://github.com/openSUSE/libsolv
     $ cd libsolv
@@ -115,8 +115,8 @@ Load a module:
 After loading, the environment variables `FOO` and `BAR` are changed:
 
     $ env | egrep 'FOO|BAR'
-    FOO=/a/b/c
-    BAR=/x/y/z
+    FOO=/a/b/c/bin
+    BAR=/x/y/z/lib
 
 List all loaded modules:
 
