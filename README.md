@@ -1,4 +1,4 @@
-# Sod
+# Sod: a modern environment module system
 
 [![Build Status](https://travis-ci.org/nolta/sod.svg?branch=master)](https://travis-ci.org/nolta/sod)
 
