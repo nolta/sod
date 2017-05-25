@@ -67,15 +67,15 @@ A *repo* is a file containing a set of modules.
 All modifications to repos are done via the `sodrepo` command.
 First, let's create an empty repo named `test.repo`:
 
-    $ sodrepo test.repo create
+    $ sodrepo test.repo create --arch=x86_64
 
 Next let's add a module. The command is:
 
-    $ sodrepo FILENAME add NAME VERSION RELEASE ARCH SUMMARY < SCRIPT
+    $ sodrepo FILENAME add NAME VERSION RELEASE SUMMARY < SCRIPT
 
 For example:
 
-    $ sodrepo test.repo add X 1.0 1 x86 "X marks the spot" <<EOF
+    $ sodrepo test.repo add X 1.0 1 "X marks the spot" <<EOF
     # a comment
     @ /x/y/z
     + FOO @/bin
@@ -83,7 +83,7 @@ For example:
     EOF
 
 This adds a module named 'X'; with version '1.0',
-release '1', architecture 'x86', summary 'X marks the spot';
+release '1', summary 'X marks the spot';
 and a script that when loaded does two things:
 
 1. prepends `/x/y/z/bin` to the environment variable `FOO`
@@ -105,12 +105,12 @@ Point sod at our repo file:
 See what modules are available:
 
     $ module avail
-    X/1.0-1.x86
+    X/1.0-1.x86_64
 
 Load a module:
 
     $ module load X
-    loading X/1.0-1.x86@test
+    loading X/1.0-1.x86_64@test
 
 After loading, the environment variables `FOO` and `BAR` are changed:
 
@@ -121,7 +121,7 @@ After loading, the environment variables `FOO` and `BAR` are changed:
 List all loaded modules:
 
     $ module list
-    X/1.0-1.x86
+    X/1.0-1.x86_64
 
 ### Dependencies
 

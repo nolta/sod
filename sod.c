@@ -147,6 +147,7 @@ sod_repo_load(Pool *pool, const char *filename)
     sqlite3 *db = NULL;
     sqlite3_open_v2(filename, &db, SQLITE_OPEN_READONLY, NULL);
 
+    // create repo
     sqlite3_stmt *stmt = NULL;
     sqlite3_prepare_v2(db, "select val from meta where key='name'", -1, &stmt, NULL);
     assert(sqlite3_step(stmt) == SQLITE_ROW);
@@ -154,27 +155,34 @@ sod_repo_load(Pool *pool, const char *filename)
     Repo *repo = repo_create(pool, name);
     sqlite3_finalize(stmt);
 
+    // get repo arch
+    stmt = NULL;
+    sqlite3_prepare_v2(db, "select val from meta where key='arch'", -1, &stmt, NULL);
+    assert(sqlite3_step(stmt) == SQLITE_ROW);
+    const char *arch = (const char *)sqlite3_column_text(stmt, 0);
+    Id arch_id = pool_str2id(pool, arch, 1);
+    sqlite3_finalize(stmt);
+
     Repodata *data = repo_add_repodata(repo, 0);
 
-    const char sql[] = "select name,version||'-'||release as evr,arch,provides,requires,summary,script from packages";
+    const char sql[] = "select name,version||'-'||release as evr,provides,requires,summary,script from packages";
     sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
 
     while (sqlite3_step(stmt) == SQLITE_ROW) {
         const char
             *pkg = (const char *)sqlite3_column_text(stmt, 0),
-            *evr = (const char *)sqlite3_column_text(stmt, 1),
-            *arch = (const char *)sqlite3_column_text(stmt, 2);
+            *evr = (const char *)sqlite3_column_text(stmt, 1);
 
         Solvable *s = pool_id2solvable(pool, repo_add_solvable(repo));
         s->name = pool_str2id(pool, pkg, 1);
         s->evr = pool_str2id(pool, evr, 1);
-        s->arch = pool_str2id(pool, arch, 1);
+        s->arch = arch_id;
 
         // pkg provides itself, 'name = evr'
         s->provides = repo_addid_dep(repo, s->provides,
             pool_rel2id(pool, s->name, s->evr, REL_EQ, 1), 0);
 
-        const char *provides = (const char *)sqlite3_column_text(stmt, 3);
+        const char *provides = (const char *)sqlite3_column_text(stmt, 2);
         if (provides && *provides) {
             char *tmpstr = strdup(provides);
             FORTOKEN(pro, tmpstr, ";") {
@@ -185,7 +193,7 @@ sod_repo_load(Pool *pool, const char *filename)
             free(tmpstr);
         }
 
-        const char *requires = (const char *)sqlite3_column_text(stmt, 4);
+        const char *requires = (const char *)sqlite3_column_text(stmt, 3);
         if (requires && *requires) {
             char *tmpstr = strdup(requires);
             FORTOKEN(req, tmpstr, ";") {
@@ -196,12 +204,12 @@ sod_repo_load(Pool *pool, const char *filename)
         }
 
         // summary
-        const char *summary = (const char *)sqlite3_column_text(stmt, 5);
+        const char *summary = (const char *)sqlite3_column_text(stmt, 4);
         if (summary && *summary)
             repodata_set_str(data, s-pool->solvables, SOLVABLE_SUMMARY, summary);
 
         // script
-        const char *script = (const char *)sqlite3_column_text(stmt, 6);
+        const char *script = (const char *)sqlite3_column_text(stmt, 5);
         if (script && *script)
             repodata_set_str(data, s-pool->solvables, SOLVABLE_SCRIPT, script);
     }

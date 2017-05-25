@@ -7,8 +7,8 @@ repo=test.sodrepo
 [[ -f $repo ]] && rm $repo
 unset ${!__sod_*}
 
-./sodrepo $repo create > /dev/null
-./sodrepo $repo add intel 16.0.2 1 x86_64 "summary" --provides='compiler' <<____
+./sodrepo $repo create --arch=x86_64 > /dev/null
+./sodrepo $repo add intel 16.0.2 1 "summary" --provides='compiler' <<____
 
   =  EMAIL  user@host 
 # comment
@@ -21,7 +21,7 @@ unset ${!__sod_*}
 ____
 
 function addpkg() {
-    ./sodrepo $repo add "$@" x86_64 '' <<<''
+    ./sodrepo $repo add "$@" '' <<<''
 }
 addpkg intel 13.1.1 1 --provides='compiler'
 addpkg intel 14.0.4 1 --provides='compiler'

@@ -3,6 +3,7 @@
 from __future__ import absolute_import, division, print_function
 
 import os
+import platform
 import re
 import sqlite3
 import sys
@@ -21,23 +22,30 @@ create table packages (
   name text not null,
   version text not null,
   release text not null,
-  arch text not null,
   provides text,
   requires text,
   summary text not null,
   script text not null,
-  unique (name,version,release,arch))"""
+  unique (name,version,release))"""
 
-def create_repo(filename, name):
+def create_repo(filename, name, arch):
+    # don't clobber file
     if os.path.exists(filename):
         error("repo", filename, "exists")
+
+    # check name
     if re.match("^[a-zA-Z0-9_]+$", name) is None:
         error("bad name (%s); only letters, numbers, or underscores allowed" % name)
-    print("creating repo '%s' named '%s'" % (filename,name))
+
+    # check arch
+    if re.match("^[a-zA-Z0-9_]+$", arch) is None:
+        error("bad arch (%s); only letters, numbers, or underscores allowed" % arch)
+
+    print("creating repo '%s' named '%s' with arch '%s'" % (filename,name,arch))
     conn = sqlite3.connect(filename)
     conn.execute(create_meta_table_stmt)
     conn.execute(create_packages_table_stmt)
-    meta = { 'name':  name }
+    meta = { 'name':  name, 'arch': arch }
     for k,v in meta.items():
         conn.execute('insert into meta values (?,?)', (k,v))
     conn.commit()
@@ -55,11 +63,11 @@ class SodRepo(object):
         if hasattr(self, 'conn'):
             self.conn.close()
 
-    def add_pkg(self, name, version, release, arch, summary, script,
+    def add_pkg(self, name, version, release, summary, script,
                 provides=None, requires=None):
         try:
-            self.conn.execute('insert into packages values (?,?,?,?,?,?,?,?)',
-                (name,version,release,arch,provides,requires,summary,script))
+            self.conn.execute('insert into packages values (?,?,?,?,?,?,?)',
+                (name,version,release,provides,requires,summary,script))
             self.conn.commit()
         except sqlite3.IntegrityError as e:
             # TBD: ignore duplicate inserts
@@ -72,13 +80,13 @@ def main():
     subparsers = parser.add_subparsers(dest='cmd')
 
     pkg = subparsers.add_parser('create', help='create repo')
-    pkg.add_argument('name', nargs='?', default=None)
+    pkg.add_argument('--name')
+    pkg.add_argument('--arch', default=platform.machine())
 
     pkg = subparsers.add_parser('add', help='add package to repo')
     pkg.add_argument('name')
     pkg.add_argument('version')
     pkg.add_argument('release')
-    pkg.add_argument('arch')
     pkg.add_argument('summary')
     pkg.add_argument('--requires')
     pkg.add_argument('--provides')
@@ -89,11 +97,11 @@ def main():
         name = args.name
         if name is None:
             name,_ = os.path.splitext(os.path.basename(args.filename))
-        create_repo(args.filename, name)
+        create_repo(args.filename, name, args.arch)
     elif args.cmd == 'add':
         repo = SodRepo(args.filename)
         script = sys.stdin.read().strip()
-        repo.add_pkg(args.name, args.version, args.release, args.arch,
+        repo.add_pkg(args.name, args.version, args.release,
             args.summary, script, requires=args.requires, provides=args.provides)
 
 if __name__ == '__main__':
