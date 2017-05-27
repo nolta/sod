@@ -68,6 +68,7 @@ All modifications to repos are done via the `sodrepo` command.
 First, let's create an empty repo named `test.repo`:
 
     $ sodrepo test.repo create --arch=x86_64
+    creating repo 'test.repo' named 'test' with arch 'x86_64'
 
 Next let's add a module. The command is:
 
