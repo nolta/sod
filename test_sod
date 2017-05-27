@@ -8,7 +8,7 @@ repo=test.sodrepo
 unset ${!__sod_*}
 
 ./sodrepo $repo create --arch=x86_64 > /dev/null
-./sodrepo $repo add intel 16.0.2 1 "summary" --provides='compiler' <<____
+./sodrepo $repo add intel/16.0.2 "summary" --provides='compiler' <<____
 
   =  EMAIL  user@host 
 # comment
@@ -23,13 +23,13 @@ ____
 function addpkg() {
     ./sodrepo $repo add "$@" '' <<<''
 }
-addpkg intel 13.1.1 1 --provides='compiler'
-addpkg intel 14.0.4 1 --provides='compiler'
-addpkg intel 15.0.2 1 --provides='compiler'
-addpkg intel 15.0.2 2 --provides='compiler'
-addpkg intel 15.0.6 1 --provides='compiler'
-addpkg hdf5-intel 1.8.11 1 --requires='intel' --provides='hdf5; libhdf5.so.7'
-addpkg hdf5-intel 1.8.14 1 --requires='intel >= 14.0.1; intel < 15' \
+addpkg intel/13.1.1 --provides='compiler'
+addpkg intel/14.0.4 --provides='compiler'
+addpkg intel/15.0.2 --provides='compiler'
+addpkg intel/15.0.2-2 --provides='compiler'
+addpkg intel/15.0.6 --provides='compiler'
+addpkg hdf5-intel/1.8.11 --requires='intel' --provides='hdf5; libhdf5.so.7'
+addpkg hdf5-intel/1.8.14 --requires='intel >= 14.0.1; intel < 15' \
     --provides='hdf5; libhdf5.so.8'
 
 diff - <(./sod -r $repo load intel) <<____
@@ -86,8 +86,8 @@ echo loading intel/14.0.4-1.x86_64@test
 echo loading hdf5-intel/1.8.14-1.x86_64@test
 ____
 
-addpkg gcc 5.2.0 1 --provides='compiler'
-addpkg hdf5-gcc 1.8.11 1 --requires='gcc' --provides='hdf5; libhdf5.so.7'
+addpkg gcc/5.2.0 --provides='compiler'
+addpkg hdf5-gcc/1.8.11 --requires='gcc' --provides='hdf5; libhdf5.so.7'
 
 diff - <(./sod -r $repo -I 'hdf5-intel/1.8.11-1.x86_64@test:intel/16.0.2-1.x86_64@test' swap hdf5-gcc | grep load) <<____
 echo unloading hdf5-intel/1.8.11-1.x86_64@test

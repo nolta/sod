@@ -73,6 +73,15 @@ class SodRepo(object):
             # TBD: ignore duplicate inserts
             raise e
 
+def splitpkg(pkg):
+    "convert 'name/version-release' -> (name,version,release)"
+    name,version = pkg.rsplit('/', 1)
+    release = 1
+    s = version.rsplit('-', 1)
+    if len(s) == 2:
+        version,release = s
+    return name,version,release
+
 def main():
     import argparse
     parser = argparse.ArgumentParser(prog='sodrepo')
@@ -84,9 +93,7 @@ def main():
     pkg.add_argument('--arch', default=platform.machine())
 
     pkg = subparsers.add_parser('add', help='add package to repo')
-    pkg.add_argument('name')
-    pkg.add_argument('version')
-    pkg.add_argument('release')
+    pkg.add_argument('pkg')
     pkg.add_argument('summary')
     pkg.add_argument('--requires')
     pkg.add_argument('--provides')
@@ -101,8 +108,9 @@ def main():
     elif args.cmd == 'add':
         repo = SodRepo(args.filename)
         script = sys.stdin.read().strip()
-        repo.add_pkg(args.name, args.version, args.release,
-            args.summary, script, requires=args.requires, provides=args.provides)
+        name,version,release = splitpkg(args.pkg)
+        repo.add_pkg(name, version, release, args.summary, script,
+            requires=args.requires, provides=args.provides)
 
 if __name__ == '__main__':
     main()

@@ -71,11 +71,11 @@ First, let's create an empty repo named `test.repo`:
 
 Next let's add a module. The command is:
 
-    $ sodrepo FILENAME add NAME VERSION RELEASE SUMMARY < SCRIPT
+    $ sodrepo FILENAME add NAME/VERSION-RELEASE SUMMARY < SCRIPT
 
 For example:
 
-    $ sodrepo test.repo add X 1.0 1 "X marks the spot" <<EOF
+    $ sodrepo test.repo add X/1.0-1 "X marks the spot" <<EOF
     # a comment
     @ /x/y/z
     + FOO @/bin
