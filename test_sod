@@ -32,11 +32,11 @@ addpkg hdf5-intel/1.8.11 --requires='intel' --provides='hdf5; libhdf5.so.7'
 addpkg hdf5-intel/1.8.14 --requires='intel >= 14.0.1; intel < 15' \
     --provides='hdf5; libhdf5.so.8'
 
-diff - <(./sod -r $repo avail | wc -l) <<____
+diff -w - <(./sod -r $repo avail | wc -l) <<____
 8
 ____
 
-diff - <(./sod -r $repo@5 avail | wc -l) <<____
+diff -w - <(./sod -r $repo@5 avail | wc -l) <<____
 5
 ____
 
