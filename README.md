@@ -23,6 +23,10 @@ only supports a limited set of reversible operations.
 
 * **module versioning**
 
+* **repository versioning**: repositories are structured as append-only
+logs. Users can fix the version they're using if they want reproducible
+results.
+
 ## Prerequisites
 
 * [libsolv][libsolv]

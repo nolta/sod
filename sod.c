@@ -3,6 +3,7 @@
  */
 
 #include <assert.h>
+#include <limits.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -142,7 +143,7 @@ sod_str2solvid(Pool *pool, const char *str)
     for (char *_=0, *TOK=strtok_r(STR,SEP,&_); TOK; TOK=strtok_r(0,SEP,&_))
 
 Repo *
-sod_repo_load(Pool *pool, const char *filename)
+sod_repo_load(Pool *pool, const char *filename, int max_id)
 {
     sqlite3 *db = NULL;
     sqlite3_open_v2(filename, &db, SQLITE_OPEN_READONLY, NULL);
@@ -165,8 +166,9 @@ sod_repo_load(Pool *pool, const char *filename)
 
     Repodata *data = repo_add_repodata(repo, 0);
 
-    const char sql[] = "select name,version||'-'||release as evr,provides,requires,summary,script from packages";
+    const char sql[] = "select name,version||'-'||release as evr,provides,requires,summary,script from packages where id <= ?";
     sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+    sqlite3_bind_int(stmt, 1, (max_id == -1) ? INT_MAX : max_id);
 
     while (sqlite3_step(stmt) == SQLITE_ROW) {
         const char
@@ -534,11 +536,7 @@ main(int argc, char *argv[])
     if (mode == USE || mode == UNUSE) {
         const char *action = (mode == USE) ? "__sod_push" : "__sod_pop";
         for (; optind < argc; optind++) {
-            const char *path = realpath(argv[optind], NULL);
-            if (path) {
-                printf("%s __sod_repos '%s'\n", action, path);
-                free((void *)path);
-            }
+            printf("%s __sod_repos '%s'\n", action, argv[optind]);
         }
         return 0;
     }
@@ -556,7 +554,16 @@ main(int argc, char *argv[])
     // load repos
     char *tmpstr = strdup(repos);
     FORTOKEN(filename, tmpstr, ":") {
-        sod_repo_load(pool, filename);
+        int max_id = -1;
+        char *at = strrchr(filename, '@');
+        if (at) {
+            *at++ = '\0';
+            max_id = atoi(at);
+            if (max_id == 0) {
+                error("bad repo max index");
+            }
+        }
+        sod_repo_load(pool, filename, max_id);
     }
     free(tmpstr);
 

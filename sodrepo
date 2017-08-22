@@ -19,6 +19,7 @@ create table meta (
 
 create_packages_table_stmt = """\
 create table packages (
+  id integer primary key,
   name text not null,
   version text not null,
   release text not null,
@@ -66,7 +67,8 @@ class SodRepo(object):
     def add_pkg(self, name, version, release, summary, script,
                 provides=None, requires=None):
         try:
-            self.conn.execute('insert into packages values (?,?,?,?,?,?,?)',
+            self.conn.execute(
+                'insert into packages values (NULL,?,?,?,?,?,?,?)',
                 (name,version,release,provides,requires,summary,script))
             self.conn.commit()
         except sqlite3.IntegrityError as e:
